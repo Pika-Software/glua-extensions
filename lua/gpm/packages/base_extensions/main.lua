@@ -5,48 +5,6 @@ local assert = assert
 local type = type
 
 --[[-------------------------------------------------------------------------
-	HEX & pBit Colors Support
----------------------------------------------------------------------------]]
-
-do
-
-    local _Color = environment.saveFunc( "Color", Color )
-    function Color( hex, g, b, a )
-        if (type( hex ) == "string") then
-            hex = hex:gsub("#", "")
-            if (hex:len() == 3) then
-                return _Color( tonumber("0x" .. hex:sub(1, 1)) * 17, tonumber("0x" .. hex:sub(2, 2)) * 17, tonumber("0x" .. hex:sub(3, 3)) * 17 )
-            else
-                return _Color( tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6)) )
-            end
-        end
-
-        if (g == nil) and (b == nil) and (a == nil) and (type( hex ) == "number") and (type( pbit ) == "table") and (type(pbit.Vec4FromInt) == "function") then
-            return _Color( pbit.Vec4FromInt( hex ) )
-        end
-
-        return _Color( hex, g, b, a )
-    end
-
-    local COLOR = FindMetaTable("Color")
-    function COLOR:SetAlpha(alpha)
-        self["a"] = alpha
-        return self
-    end
-
-    local Lerp = Lerp
-    function COLOR:Lerp(frac, b)
-        self["r"] = Lerp(frac, b["r"], self["r"])
-        self["g"] = Lerp(frac, b["g"], self["g"])
-        self["b"] = Lerp(frac, b["b"], self["b"])
-        self["a"] = Lerp(frac, b["a"] or 255, self["a"] or 255)
-
-        return self
-    end
-
-end
-
---[[-------------------------------------------------------------------------
 	Net tables compress method by DefaultOS#5913
 ---------------------------------------------------------------------------]]
 
@@ -87,6 +45,68 @@ end
 
 if CLIENT then
     ents.Create = ents.CreateClientside
+end
+
+--[[-------------------------------------------------------------------------
+	ents.closest
+---------------------------------------------------------------------------]]
+
+do
+
+    local math_huge = math.huge
+    function ents.closest( tbl, pos )
+        local distance, entity = math_huge
+
+        for num, ent in ipairs( tbl ) do
+            local dist = ent:GetPos():DistToSqr( pos )
+            if (dist < distance) then
+                distance = dist
+                entity = ent
+            end
+        end
+
+        return entity
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    player.GetListenServerHost
+---------------------------------------------------------------------------]]
+
+do
+
+    local player_GetHumans = player.GetHumans
+    function player.GetListenServerHost()
+        for num, ply in ipairs( player_GetHumans() ) do
+            if ply:IsListenServerHost() then
+                return ply
+            end
+        end
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    player.FindInSphere
+---------------------------------------------------------------------------]]
+
+do
+
+    local ents_FindInSphere = ents.FindInSphere
+    local table_insert = table.insert
+
+    function player.FindInSphere( origin, radius )
+        local players = {}
+        for num, ent in ipairs( ents_FindInSphere( origin, radius ) ) do
+            if ent:IsPlayer() then
+                table_insert( players, ent )
+            end
+        end
+
+        return players
+    end
+
 end
 
 --[[-------------------------------------------------------------------------
@@ -194,6 +214,72 @@ end
 math.Map = math.Remap
 
 --[[-------------------------------------------------------------------------
+    Color Extension
+---------------------------------------------------------------------------]]
+
+local _Lerp = environment.saveFunc( "Lerp", Lerp )
+function LerpColor( frac, a, b )
+    a["r"] = _Lerp( frac, b["r"], a["r"] )
+	a["g"] = _Lerp( frac, b["g"], a["g"] )
+	a["b"] = _Lerp( frac, b["b"], a["b"] )
+	a["a"] = _Lerp( frac, b["a"] or 255, a["a"] or 255 )
+
+    return a
+end
+
+do
+
+    local _Color = environment.saveFunc( "Color", Color )
+    function Color( hex, g, b, a )
+        if (type( hex ) == "string") then
+            hex = hex:gsub("#", "")
+            if (hex:len() == 3) then
+                return _Color( tonumber("0x" .. hex:sub(1, 1)) * 17, tonumber("0x" .. hex:sub(2, 2)) * 17, tonumber("0x" .. hex:sub(3, 3)) * 17 )
+            else
+                return _Color( tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6)) )
+            end
+        end
+
+        if (g == nil) and (b == nil) and (a == nil) and (type( hex ) == "number") and (type( pbit ) == "table") and (type(pbit.Vec4FromInt) == "function") then
+            return _Color( pbit.Vec4FromInt( hex ) )
+        end
+
+        return _Color( hex, g, b, a )
+    end
+
+    local COLOR = FindMetaTable("Color")
+    function COLOR:SetAlpha(alpha)
+        self["a"] = alpha
+        return self
+    end
+
+    function COLOR:Lerp( frac, b )
+        return LerpColor( frac, self, b )
+    end
+
+end
+
+do
+
+    local VMATRIX = FindMetaTable( "VMatrix" )
+    local vector_origin = vector_origin
+    local angle_zero = angle_zero
+
+    local __scale = Vector( 1, 1 )
+    function VMATRIX:Reset( scale )
+        self:Zero()
+        self:SetScale( scale or __scale )
+        self:SetAngles( angle_zero )
+        self:SetTranslation( vector_origin )
+        self:SetField(1, 1, 1)
+        self:SetField(2, 2, 1)
+        self:SetField(3, 3, 1)
+        self:SetField(4, 4, 1)
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
 	Angle improvements
 ---------------------------------------------------------------------------]]
 
@@ -230,6 +316,26 @@ do
     end
 
 end
+
+--[[-------------------------------------------------------------------------
+    Improvement Lerp
+---------------------------------------------------------------------------]]
+
+function Lerp( frac, a, b )
+    if IsColor( a ) then
+        return LerpColor( frac, a, b )
+    elseif isvector( a ) then
+        return LerpVector( frac, a, b )
+    elseif isangle( a ) then
+        return LerpAngle( frac, a, b )
+    else
+        return _Lerp( frac, a, b )
+    end
+end
+
+--[[-------------------------------------------------------------------------
+    PlayerInitialized Hook
+---------------------------------------------------------------------------]]
 
 if CLIENT then
     hook.Add( "RenderScene", "Base Extensions:PlayerInitialized", function()
