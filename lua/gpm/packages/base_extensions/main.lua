@@ -5,38 +5,43 @@ local assert = assert
 local type = type
 
 --[[-------------------------------------------------------------------------
-    pBit Lib
----------------------------------------------------------------------------]]
-
-local pbit = false
-local pbit_package = GPM.Loader.FindPackage("pBit")
-if pbit_package and (pbit_package.state == "loaded") then
-    pbit = true
-end
-
---[[-------------------------------------------------------------------------
-	HEX & Int Colors Support
+	HEX & pBit Colors Support
 ---------------------------------------------------------------------------]]
 
 do
 
     local _Color = environment.saveFunc( "Color", Color )
-    function Color(hex, g, b, a)
-        if (g == nil) and (b == nil) and (a == nil) then
-            local type = type( hex )
-            if (type == "string") then
-                hex = hex:gsub("#", "")
-                if (hex:len() == 3) then
-                    return _Color( tonumber("0x" .. hex:sub(1, 1)) * 17, tonumber("0x" .. hex:sub(2, 2)) * 17, tonumber("0x" .. hex:sub(3, 3)) * 17 )
-                else
-                    return _Color( tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6)) )
-                end
-            elseif (type == "number") and pbit then
-                return _Color( pbit.Vec4FromInt( hex ) )
+    function Color( hex, g, b, a )
+        if (type( hex ) == "string") then
+            hex = hex:gsub("#", "")
+            if (hex:len() == 3) then
+                return _Color( tonumber("0x" .. hex:sub(1, 1)) * 17, tonumber("0x" .. hex:sub(2, 2)) * 17, tonumber("0x" .. hex:sub(3, 3)) * 17 )
+            else
+                return _Color( tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6)) )
             end
         end
 
+        if (g == nil) and (b == nil) and (a == nil) and (type( hex ) == "number") and (type( pbit ) == "table") and (type(pbit.Vec4FromInt) == "function") then
+            return _Color( pbit.Vec4FromInt( hex ) )
+        end
+
         return _Color( hex, g, b, a )
+    end
+
+    local COLOR = FindMetaTable("Color")
+    function COLOR:SetAlpha(alpha)
+        self["a"] = alpha
+        return self
+    end
+
+    local Lerp = Lerp
+    function COLOR:Lerp(frac, b)
+        self["r"] = Lerp(frac, b["r"], self["r"])
+        self["g"] = Lerp(frac, b["g"], self["g"])
+        self["b"] = Lerp(frac, b["b"], self["b"])
+        self["a"] = Lerp(frac, b["a"] or 255, self["a"] or 255)
+
+        return self
     end
 
 end
@@ -47,21 +52,27 @@ end
 
 do
 
-    local util_Compress = util.Compress
     local util_TableToJSON = util.TableToJSON
+    local util_Compress = util.Compress
     local net_WriteUInt = net.WriteUInt
     local net_WriteData = net.WriteData
-    local net_ReadUInt = net.ReadUInt
+
+    function net.WriteCompressTable( tbl )
+        if (type( tbl ) == "table") then
+            local data = util_Compress( util_TableToJSON( tbl ) )
+            net_WriteUInt( #data, 16 )
+            net_WriteData( data, #data )
+        end
+    end
+
+end
+
+do
+
     local util_JSONToTable = util.JSONToTable
     local util_Decompress = util.Decompress
     local net_ReadData = net.ReadData
-
-    function net.WriteCompressTable(tbl)
-        if (tbl == nil) then return end
-        local data = util_Compress(util_TableToJSON(tbl))
-        net_WriteUInt(#data, 16)
-        net_WriteData(data, #data)
-    end
+    local net_ReadUInt = net.ReadUInt
 
     function net.ReadCompressTable()
         local len = net_ReadUInt(16)
@@ -191,29 +202,8 @@ local LerpAngle = LerpAngle
 do
 
     local ANGLE = FindMetaTable("Angle")
-    function ANGLE:Lerp(frac, b)
-        return LerpAngle(frac, self, b)
-    end
-
-    function ANGLE:Floor()
-        self[1] = math_floor(self[1])
-        self[2] = math_floor(self[2])
-        self[3] = math_floor(self[3])
-        return self
-    end
-
-    function ANGLE:abs()
-        self[1] = math_abs(self[1])
-        self[2] = math_abs(self[2])
-        self[3] = math_abs(self[3])
-        return self
-    end
-
-    function ANGLE:NormalizeZero()
-        self[1] = (self[1] == 0) and 0 or self[1]
-        self[2] = (self[2] == 0) and 0 or self[2]
-        self[3] = (self[3] == 0) and 0 or self[3]
-        return self
+    function ANGLE:Lerp( frac, b )
+        return LerpAngle( frac, self, b )
     end
 
 end
@@ -227,42 +217,16 @@ local LerpVector = LerpVector
 do
 
     local VECTOR = FindMetaTable("Vector")
-    function VECTOR:Diameter(maxs)
-        return math_max( maxs[1] + math_abs(self[1]), maxs[2] + math_abs(self[2]), maxs[3] + math_abs(self[3]) )
-    end
-
-    function VECTOR:InBox(vec1, vec2)
-        return self[1] >= vec1[1] and self[1] <= vec2[1] and self[2] >= vec1[2] and self[2] <= vec2[2] and self[3] >= vec1[3] and self[3] <= vec2[3]
-    end
-
-    function VECTOR:Round(dec)
-        return Vector( math_Round(self[1], dec or 0), math_Round(self[2], dec or 0), math_Round(self[3], dec or 0) )
-    end
-
-    function VECTOR:Floor()
-        self[1] = math_floor(self[1])
-        self[2] = math_floor(self[2])
-        self[3] = math_floor(self[3])
-        return self
-    end
-
-    function VECTOR:Abs()
-        self[1] = math_abs(self[1])
-        self[2] = math_abs(self[2])
-        self[3] = math_abs(self[3])
-        return self
-    end
-
     function VECTOR:Middle( vec )
         if isvector( vec ) then
             return ( self + vec ) / 2
         else
-            return (self[1] + self[2] + self[3]) / 3
+            return ( self[1] + self[2] + self[3] ) / 3
         end
     end
 
-    function VECTOR:Lerp(frac, b)
-        return LerpVector(frac, self, b)
+    function VECTOR:Lerp( frac, b )
+        return LerpVector( frac, self, b )
     end
 
 end
