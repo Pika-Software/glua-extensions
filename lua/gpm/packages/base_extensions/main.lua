@@ -250,6 +250,69 @@ function string.charCount( str, char )
 end
 
 --[[-------------------------------------------------------------------------
+	table module improvements
+---------------------------------------------------------------------------]]
+
+function table.Sub(tbl, offset, len)
+	local newTbl = {}
+	for i = 1, len do
+		newTbl[i] = tbl[i + offset]
+	end
+
+	return newTbl
+end
+
+function table.Sum( arr )
+	local sum = 0
+    for num, int in ipairs( arr ) do
+        sum = sum + int
+    end
+
+	return sum
+end
+
+function table.Min( tbl )
+	local min = nil
+	for key, value in ipairs( tbl ) do
+		if (min == nil) or (value < min) then
+			min = value
+		end
+	end
+
+	return min
+end
+
+function table.Max( tbl )
+	local max = nil
+	for key, value in ipairs( tbl ) do
+		if (max == nil) or (value > max) then
+			max = value
+		end
+	end
+
+	return max
+end
+
+do
+
+    local table_Copy = table.Copy
+    function table.Lookup( tbl, key, default )
+        local lookup = table_Copy( tbl )
+
+        for num, fragment in ipairs( key:Split( "." ) ) do
+            lookup = lookup[fragment]
+
+            if not lookup then
+                return default
+            end
+        end
+
+        return lookup
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
 	C# math.Map = Lua math.Remap
 ---------------------------------------------------------------------------]]
 
@@ -396,4 +459,62 @@ else
             end
         end)
     end)
+end
+
+local ENTITY = FindMetaTable( "Entity" )
+
+--[[-------------------------------------------------------------------------
+    ENTITY:IsDoor
+---------------------------------------------------------------------------]]
+
+do
+
+    local doorClasses = {
+        ["prop_testchamber_door"] = true,
+        ["prop_door_rotating"] = true,
+        ["func_door_rotating"] = true,
+        ["func_door"] = true,
+        ["dz_door"] = true
+    }
+
+    function ENTITY:IsDoor()
+        return doorClasses[self:GetClass()] or false
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    ENTITY:IsProp
+---------------------------------------------------------------------------]]
+
+do
+
+    local propClasses = {
+        ["prop_detail"] = true,
+        ["prop_static"] = true,
+        ["prop_physics"] = true,
+        ["prop_ragdoll"] = true,
+        ["prop_dynamic"] = true,
+        ["prop_physics_override"] = true,
+        ["prop_dynamic_override"] = true,
+        ["prop_physics_multiplayer"] = true
+    }
+
+    function ENTITY:IsProp()
+        return propClasses[self:GetClass()] or false
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    ENTITY:GetSpeed
+---------------------------------------------------------------------------]]
+
+do
+
+    local math_abs = math.abs
+    function ENTITY:GetSpeed()
+        return math_abs( self:GetVelocity():Length() )
+    end
+
 end
