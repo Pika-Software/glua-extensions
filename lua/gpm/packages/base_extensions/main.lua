@@ -110,6 +110,40 @@ do
 end
 
 --[[-------------------------------------------------------------------------
+    game.GetMaps
+---------------------------------------------------------------------------]]
+
+do
+
+    local file_Find = file.Find
+    function game.GetMaps()
+        local maps = {}
+        for num, fl in ipairs( file_Find("maps/*", "GAME") ) do
+            if (fl:GetExtensionFromFilename() == "bsp") then
+                table_insert( maps, fl:sub( 1, #fl - 4 ) )
+            end
+        end
+
+        return maps
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    game.MapHasNav
+---------------------------------------------------------------------------]]
+
+do
+
+    local file_Exists = file.Exists
+    function game.MapHasNav( map )
+        assert( type( map ) == "string", "bad argument #1 (string expected)" )
+        return file_Exists( "maps/" .. map .. ".nav" )
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
     engine.GetAddon
 ---------------------------------------------------------------------------]]
 
