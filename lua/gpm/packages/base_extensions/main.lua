@@ -4,6 +4,12 @@ local ipairs = ipairs
 local assert = assert
 local type = type
 
+if SERVER then
+    AddCSLuaFile( "gpm/packages/base_extensions/cl_main.lua" )
+else
+    include( "gpm/packages/base_extensions/cl_main.lua" )
+end
+
 --[[-------------------------------------------------------------------------
 	Net tables compress method by DefaultOS#5913
 ---------------------------------------------------------------------------]]
@@ -91,11 +97,11 @@ end
     player.FindInSphere
 ---------------------------------------------------------------------------]]
 
+local table_insert = table.insert
+
 do
 
     local ents_FindInSphere = ents.FindInSphere
-    local table_insert = table.insert
-
     function player.FindInSphere( origin, radius )
         local players = {}
         for num, ent in ipairs( ents_FindInSphere( origin, radius ) ) do
@@ -105,6 +111,26 @@ do
         end
 
         return players
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    game.AmmoList
+---------------------------------------------------------------------------]]
+
+do
+
+    local game_GetAmmoName = game.GetAmmoName
+    function game.AmmoList()
+        local last = game_GetAmmoName(1)
+        local ammoList = {last}
+
+        while (last ~= nil) do
+            last = game_GetAmmoName( table_insert( ammoList, last ) )
+        end
+
+        return ammoList
     end
 
 end
