@@ -82,11 +82,23 @@ end
 
 do
 
-    local player_GetHumans = player.GetHumans
-    function player.GetListenServerHost()
-        for num, ply in ipairs( player_GetHumans() ) do
-            if ply:IsListenServerHost() then
-                return ply
+    if game.SinglePlayer() then
+        local Entity = Entity
+        function player.GetListenServerHost()
+            return Entity( 1 )
+        end
+    else
+        local isDedicated = game.IsDedicated()
+        if isDedicated then
+            player.GetListenServerHost = environment.loadFunc()
+        else
+            local player_GetHumans = player.GetHumans
+            function player.GetListenServerHost()
+                for num, ply in ipairs( player_GetHumans() ) do
+                    if ply:IsListenServerHost() then
+                        return ply
+                    end
+                end
             end
         end
     end
