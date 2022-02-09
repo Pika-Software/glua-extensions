@@ -95,7 +95,7 @@ do
             local player_GetHumans = player.GetHumans
             function player.GetListenServerHost()
                 for num, ply in ipairs( player_GetHumans() ) do
-                    if ply:IsListenServerHost() then
+                    if ( type(ply.IsListenServerHost) == "function" ) and ply:IsListenServerHost() then
                         return ply
                     end
                 end
