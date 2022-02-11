@@ -479,31 +479,41 @@ end
 --[[-------------------------------------------------------------------------
     PlayerInitialized Hook
 ---------------------------------------------------------------------------]]
+do
 
-if CLIENT then
-    hook.Add( "RenderScene", "Base Extensions:PlayerInitialized", function()
-        hook.Remove( "RenderScene", "Base Extensions:PlayerInitialized" )
-        local ply = LocalPlayer()
-        ply["Initialized"] = true
-        hook.Run("PlayerInitialized", ply)
-    end)
-else
-    hook.Add("PlayerInitialSpawn", "Base Extensions:PlayerInitialized", function(ply)
-        hook.Add("SetupMove", ply, function( self, ply, _, cmd )
-            if (self == ply) and not cmd:IsForced() then
-                hook.Remove("SetupMove", self)
-                self["Initialized"] = true
-                hook.Run("PlayerInitialized", self)
-            end
+    local LocalPlayer = LocalPlayer
+
+    if CLIENT then
+        hook.Add("ShutDown", "Base Extensions:PlayerDisconnected", function()
+            hook.Remove("ShutDown", "Base Extensions:PlayerDisconnected")
+            hook.Run( "PlayerDisconnected", LocalPlayer() )
         end)
-    end)
-end
 
-local ENTITY = FindMetaTable( "Entity" )
+        hook.Add( "RenderScene", "Base Extensions:PlayerInitialized", function()
+            hook.Remove( "RenderScene", "Base Extensions:PlayerInitialized" )
+            local ply = LocalPlayer()
+            ply["Initialized"] = true
+            hook.Run("PlayerInitialized", ply)
+        end)
+    else
+        hook.Add("PlayerInitialSpawn", "Base Extensions:PlayerInitialized", function(ply)
+            hook.Add("SetupMove", ply, function( self, ply, _, cmd )
+                if (self == ply) and not cmd:IsForced() then
+                    hook.Remove("SetupMove", self)
+                    self["Initialized"] = true
+                    hook.Run("PlayerInitialized", self)
+                end
+            end)
+        end)
+    end
+
+end
 
 --[[-------------------------------------------------------------------------
     ENTITY:IsDoor
 ---------------------------------------------------------------------------]]
+
+local ENTITY = FindMetaTable( "Entity" )
 
 do
 
