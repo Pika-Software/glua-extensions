@@ -482,25 +482,34 @@ end
 do
 
     local LocalPlayer = LocalPlayer
+    local PLAYER = FindMetaTable( "Player" )
+    PLAYER.Initialize = environment.loadFunc()
 
     if CLIENT then
         hook.Add("ShutDown", "Base Extensions:PlayerDisconnected", function()
             hook.Remove("ShutDown", "Base Extensions:PlayerDisconnected")
-            hook.Run( "PlayerDisconnected", LocalPlayer() )
+            local ply = LocalPlayer()
+            if IsValid( ply ) then
+                hook.Run( "PlayerDisconnected", ply )
+            end
         end)
 
-        hook.Add( "RenderScene", "Base Extensions:PlayerInitialized", function()
+        hook.Add("RenderScene", "Base Extensions:PlayerInitialized", function()
             hook.Remove( "RenderScene", "Base Extensions:PlayerInitialized" )
             local ply = LocalPlayer()
             ply["Initialized"] = true
+            ply:Initialize()
+
             hook.Run("PlayerInitialized", ply)
         end)
     else
         hook.Add("PlayerInitialSpawn", "Base Extensions:PlayerInitialized", function(ply)
-            hook.Add("SetupMove", ply, function( self, ply, _, cmd )
+            hook.Add("SetupMove", ply, function( self, ply, mv, cmd )
                 if (self == ply) and not cmd:IsForced() then
                     hook.Remove("SetupMove", self)
                     self["Initialized"] = true
+                    self:Initialize()
+
                     hook.Run("PlayerInitialized", self)
                 end
             end)
