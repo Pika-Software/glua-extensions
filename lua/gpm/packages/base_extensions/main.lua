@@ -1,13 +1,21 @@
 local math_floor = math.floor
-local tonumber = tonumber
 local ipairs = ipairs
 local assert = assert
 local type = type
 
-if SERVER then
-    AddCSLuaFile( "gpm/packages/base_extensions/cl_main.lua" )
-else
-    include( "gpm/packages/base_extensions/cl_main.lua" )
+--[[-------------------------------------------------------------------------
+    engine.GetAddon( `string` id )
+---------------------------------------------------------------------------]]
+
+do
+    local engine_GetAddons = engine.GetAddons
+    function engine.GetAddon( id )
+        for num, addon in ipairs( engine_GetAddons() ) do
+            if (addon["wsid"] == id) then
+                return addon
+            end
+        end
+    end
 end
 
 --[[-------------------------------------------------------------------------
@@ -46,11 +54,24 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-	ents.Create on Client
+	IMaterial improvements
 ---------------------------------------------------------------------------]]
 
-if CLIENT then
-    ents.Create = ents.CreateClientside
+do
+
+    local IMATERIAL = FindMetaTable( "IMaterial" )
+
+    do
+        local getmetatable = getmetatable
+        function ismaterial( any )
+            return getmetatable( any ) == IMATERIAL
+        end
+    end
+
+    function IMATERIAL:GetSize()
+        return self:GetInt( "$realwidth" ), self:GetInt( "$realheight" )
+    end
+
 end
 
 --[[-------------------------------------------------------------------------
@@ -95,7 +116,7 @@ do
             local player_GetHumans = player.GetHumans
             function player.GetListenServerHost()
                 for num, ply in ipairs( player_GetHumans() ) do
-                    if ( type(ply.IsListenServerHost) == "function" ) and ply:IsListenServerHost() then
+                    if type( ply.IsListenServerHost ) == "function" and ply:IsListenServerHost() then
                         return ply
                     end
                 end
@@ -106,30 +127,10 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-    player.FindInSphere
+    game.AmmoList
 ---------------------------------------------------------------------------]]
 
 local table_insert = table.insert
-
-do
-
-    local ents_FindInSphere = ents.FindInSphere
-    function player.FindInSphere( origin, radius )
-        local players = {}
-        for num, ent in ipairs( ents_FindInSphere( origin, radius ) ) do
-            if ent:IsPlayer() then
-                table_insert( players, ent )
-            end
-        end
-
-        return players
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-    game.AmmoList
----------------------------------------------------------------------------]]
 
 do
 
@@ -148,7 +149,7 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-    game.GetMaps
+    game.GetMaps()
 ---------------------------------------------------------------------------]]
 
 do
@@ -168,7 +169,27 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-    game.MapHasNav
+    game.HasMap( `string` map )
+---------------------------------------------------------------------------]]
+
+do
+
+    local game_GetMaps = game.GetMaps
+    function game.HasMap( str )
+        local mapName = str:Replace( ".bsp", "" )
+        for num, map in ipairs( game_GetMaps() ) do
+            if (map == mapName) then
+                return true
+            end
+        end
+
+        return false
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    game.MapHasNav( `string` map )
 ---------------------------------------------------------------------------]]
 
 do
@@ -182,32 +203,15 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-    engine.GetAddon
----------------------------------------------------------------------------]]
-
-do
-
-    local engine_GetAddons = engine.GetAddons
-    function engine.GetAddon(id)
-        for num, addon in ipairs( engine_GetAddons() ) do
-            if (addon["wsid"] == id) then
-                return addon
-            end
-        end
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-    string.isURL
+    string.isURL( `string` str )
 ---------------------------------------------------------------------------]]
 
 function string.isURL( str )
-	return str:match("^https?://.*")
+	return str:match( "^https?://.*" )
 end
 
 --[[-------------------------------------------------------------------------
-    string.Hash - string to hash
+    string.Hash( `string` str ) - string to hash
 ---------------------------------------------------------------------------]]
 
 do
@@ -215,7 +219,7 @@ do
     local math_fmod = math.fmod
     function string.Hash( str )
         local hash = 0
-        for _, v in ipairs({ str:byte( 0, str:len() ) }) do
+        for num, v in ipairs({ str:byte( 0, str:len() ) }) do
             hash = math_fmod( v + ((hash * 32) - hash), 0x07FFFFFF )
         end
 
@@ -225,7 +229,7 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-    string.FormatSeconds - seconds to formated time string
+    string.FormatSeconds( `string` sec ) - seconds to formated time string
 ---------------------------------------------------------------------------]]
 
 do
@@ -256,7 +260,7 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-    string.FindFromTable
+    string.FindFromTable( `string` str, `table` tbl )
 ---------------------------------------------------------------------------]]
 
 function string.FindFromTable( str, tbl )
@@ -291,7 +295,7 @@ end
 	table module improvements
 ---------------------------------------------------------------------------]]
 
-function table.Sub(tbl, offset, len)
+function table.Sub( tbl, offset, len )
 	local newTbl = {}
 	for i = 1, len do
 		newTbl[i] = tbl[i + offset]
@@ -357,50 +361,8 @@ end
 math.Map = math.Remap
 
 --[[-------------------------------------------------------------------------
-    Color Extension
+    VMatrix Extension
 ---------------------------------------------------------------------------]]
-
-local _Lerp = environment.saveFunc( "Lerp", Lerp )
-function LerpColor( frac, a, b )
-    a["r"] = _Lerp( frac, b["r"], a["r"] )
-	a["g"] = _Lerp( frac, b["g"], a["g"] )
-	a["b"] = _Lerp( frac, b["b"], a["b"] )
-	a["a"] = _Lerp( frac, b["a"] or 255, a["a"] or 255 )
-
-    return a
-end
-
-do
-
-    local _Color = environment.saveFunc( "Color", Color )
-    function Color( hex, g, b, a )
-        if (type( hex ) == "string") then
-            hex = hex:gsub("#", "")
-            if (hex:len() == 3) then
-                return _Color( tonumber("0x" .. hex:sub(1, 1)) * 17, tonumber("0x" .. hex:sub(2, 2)) * 17, tonumber("0x" .. hex:sub(3, 3)) * 17 )
-            else
-                return _Color( tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6)) )
-            end
-        end
-
-        if (g == nil) and (b == nil) and (a == nil) and (type( hex ) == "number") and (type( pbit ) == "table") and (type(pbit.Vec4FromInt) == "function") then
-            return _Color( pbit.Vec4FromInt( hex ) )
-        end
-
-        return _Color( hex, g, b, a )
-    end
-
-    local COLOR = FindMetaTable("Color")
-    function COLOR:SetAlpha(alpha)
-        self["a"] = alpha
-        return self
-    end
-
-    function COLOR:Lerp( frac, b )
-        return LerpColor( frac, self, b )
-    end
-
-end
 
 do
 
@@ -426,11 +388,11 @@ end
 	Angle improvements
 ---------------------------------------------------------------------------]]
 
-local LerpAngle = LerpAngle
-
 do
 
     local ANGLE = FindMetaTable("Angle")
+    local LerpAngle = LerpAngle
+
     function ANGLE:Lerp( frac, b )
         return LerpAngle( frac, self, b )
     end
@@ -441,10 +403,7 @@ end
 	Vector improvements
 ---------------------------------------------------------------------------]]
 
-local LerpVector = LerpVector
-
 do
-
     local VECTOR = FindMetaTable("Vector")
     function VECTOR:Middle( vec )
         if isvector( vec ) then
@@ -454,66 +413,31 @@ do
         end
     end
 
-    function VECTOR:Lerp( frac, b )
-        return LerpVector( frac, self, b )
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-    Improvement Lerp
----------------------------------------------------------------------------]]
-
-function Lerp( frac, a, b )
-    if IsColor( a ) then
-        return LerpColor( frac, a, b )
-    elseif isvector( a ) then
-        return LerpVector( frac, a, b )
-    elseif isangle( a ) then
-        return LerpAngle( frac, a, b )
-    else
-        return _Lerp( frac, a, b )
+    do
+        local LerpVector = LerpVector
+        function VECTOR:Lerp( frac, b )
+            return LerpVector( frac, self, b )
+        end
     end
 end
 
 --[[-------------------------------------------------------------------------
-    PlayerInitialized Hook
+    Easy net.Start
 ---------------------------------------------------------------------------]]
-do
 
-    local LocalPlayer = LocalPlayer
-    local PLAYER = FindMetaTable( "Player" )
-    PLAYER.Initialize = environment.loadFunc()
+if (SERVER) then
 
-    if CLIENT then
-        hook.Add("ShutDown", "Base Extensions:PlayerDisconnected", function()
-            hook.Remove("ShutDown", "Base Extensions:PlayerDisconnected")
-            local ply = LocalPlayer()
-            if IsValid( ply ) then
-                hook.Run( "PlayerDisconnected", ply )
-            end
-        end)
+    local net_Start = environment.saveFunc( "net.Start", net.Start )
 
-        hook.Add("RenderScene", "Base Extensions:PlayerInitialized", function()
-            hook.Remove( "RenderScene", "Base Extensions:PlayerInitialized" )
-            local ply = LocalPlayer()
-            ply["Initialized"] = true
-            ply:Initialize()
+    local util_AddNetworkString = util.AddNetworkString
+    local util_NetworkStringToID = util.NetworkStringToID
 
-            hook.Run("PlayerInitialized", ply)
-        end)
-    else
-        hook.Add("PlayerInitialSpawn", "Base Extensions:PlayerInitialized", function(ply)
-            hook.Add("SetupMove", ply, function( self, ply, mv, cmd )
-                if (self == ply) and not cmd:IsForced() then
-                    hook.Remove("SetupMove", self)
-                    self["Initialized"] = true
-                    self:Initialize()
+    function net.Start( name, bool )
+        if (util_NetworkStringToID( name ) == 0) then
+            util_AddNetworkString( name )
+        end
 
-                    hook.Run("PlayerInitialized", self)
-                end
-            end)
-        end)
+        return net_Start( name, bool )
     end
 
 end
@@ -525,7 +449,6 @@ end
 local ENTITY = FindMetaTable( "Entity" )
 
 do
-
     local doorClasses = {
         ["prop_testchamber_door"] = true,
         ["prop_door_rotating"] = true,
@@ -537,7 +460,6 @@ do
     function ENTITY:IsDoor()
         return doorClasses[self:GetClass()] or false
     end
-
 end
 
 --[[-------------------------------------------------------------------------
@@ -568,10 +490,15 @@ end
 ---------------------------------------------------------------------------]]
 
 do
-
     local math_abs = math.abs
     function ENTITY:GetSpeed()
         return math_abs( self:GetVelocity():Length() )
     end
+end
 
+if (SERVER) then
+    AddCSLuaFile( "gpm/packages/base_extensions/_client.lua" )
+    include( "gpm/packages/base_extensions/_server.lua" )
+else
+    include( "gpm/packages/base_extensions/_client.lua" )
 end
