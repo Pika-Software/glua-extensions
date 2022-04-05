@@ -4,6 +4,32 @@ local assert = assert
 local type = type
 
 --[[-------------------------------------------------------------------------
+    switch for glua
+---------------------------------------------------------------------------]]
+
+function switch( var, tbl, ... )
+    local func = tbl[ var ]
+    if (func == nil) then
+        local default = tbl.default
+        if (default ~= nil) then
+            assert( type( default ) == "function", "Bad default var! Must be function or nil.")
+            return default( ... )
+        end
+
+        local numberDefault = tbl[0]
+        if (numberDefault ~= nil) then
+            assert( type( numberDefault ) == "function", "Bad 0 default key! Must be function or nil.")
+            return numberDefault( ... )
+        end
+
+        return
+    end
+    assert( type( func ) == "function", "Bad case - " .. tostring( var ) .. "! Must be function.")
+
+    return func( ... )
+end
+
+--[[-------------------------------------------------------------------------
     engine.GetAddon( `string` id )
 ---------------------------------------------------------------------------]]
 
