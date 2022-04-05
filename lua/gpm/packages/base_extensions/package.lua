@@ -1,7 +1,7 @@
 return {
     name = "Base Extensions",
     description = "Extending the basic functionality of GLua.",
-    version = "1.4.0",
+    version = "1.4.1",
     dependencies = {
         ["Environment Library"] = ">=1.0.0"
     },

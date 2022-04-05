@@ -112,13 +112,3 @@ do
     end
 
 end
-
---[[-------------------------------------------------------------------------
-    PrePlayerChat
----------------------------------------------------------------------------]]
-
-local hook_Run = hook.Run
-hook.Add("OnPlayerChat", "GPM:PrePlayerChat", function( ... )
-	local ret = hook_Run( "PrePlayerChat", ... )
-	if (ret != nil) then return ret end
-end)
