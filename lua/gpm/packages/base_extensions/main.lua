@@ -101,6 +101,32 @@ do
 end
 
 --[[-------------------------------------------------------------------------
+    concommand.Exists
+---------------------------------------------------------------------------]]
+do
+    local concommand_GetTable = concommand.GetTable
+    function concommand.Exists( name )
+        return concommand_GetTable()[ name ] ~= nil
+    end
+end
+
+--[[-------------------------------------------------------------------------
+    gamemode.GetName & engine.GetGamemodeTitle
+---------------------------------------------------------------------------]]
+do
+    local engine_GetGamemodes = engine.GetGamemodes
+    function gamemode.GetTitle( name )
+        for num, tbl in ipairs( engine_GetGamemodes() ) do
+            if (tbl.name == name) then
+                return tbl.title or name
+            end
+        end
+    end
+
+    engine.GetGamemodeTitle = gamemode.GetTitle
+end
+
+--[[-------------------------------------------------------------------------
 	ents.closest
 ---------------------------------------------------------------------------]]
 
