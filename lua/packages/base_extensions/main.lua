@@ -549,8 +549,8 @@ do
 end
 
 if (SERVER) then
-    AddCSLuaFile( "gpm/packages/base_extensions/_client.lua" )
-    include( "gpm/packages/base_extensions/_server.lua" )
+    AddCSLuaFile( "packages/base_extensions/_client.lua" )
+    include( "packages/base_extensions/_server.lua" )
 else
-    include( "gpm/packages/base_extensions/_client.lua" )
+    include( "packages/base_extensions/_client.lua" )
 end
