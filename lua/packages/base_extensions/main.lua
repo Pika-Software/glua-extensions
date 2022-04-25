@@ -45,6 +45,42 @@ do
 end
 
 --[[-------------------------------------------------------------------------
+    engine.GetGMAFiles( `string` path )
+---------------------------------------------------------------------------]]
+
+do
+
+    local empty = {}
+    local game_MountGMA = game.MountGMA
+    function engine.GetGMAFiles( path )
+        local ok, files = game_MountGMA( path )
+        return ok and files or empty
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+    engine.GetAddonFiles( `string` id )
+---------------------------------------------------------------------------]]
+
+do
+
+    local empty = {}
+    local engine_GetAddon = engine.GetAddon
+    local engine_GetGMAFiles = engine.GetGMAFiles
+
+    function engine.GetAddonFiles( id )
+        local addon = engine_GetAddon( id )
+        if (addon == nil) then
+            return empty
+        end
+
+        return engine_GetGMAFiles( addon.file )
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
 	Net tables compress method by DefaultOS#5913
 ---------------------------------------------------------------------------]]
 
