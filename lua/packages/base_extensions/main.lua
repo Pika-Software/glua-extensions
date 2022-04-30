@@ -423,15 +423,6 @@ function table.Sub( tbl, offset, len )
 	return newTbl
 end
 
-function table.Sum( arr )
-	local sum = 0
-    for num, int in ipairs( arr ) do
-        sum = sum + int
-    end
-
-	return sum
-end
-
 function table.Min( tbl )
 	local min = nil
 	for key, value in ipairs( tbl ) do
@@ -523,21 +514,13 @@ end
 ---------------------------------------------------------------------------]]
 
 do
+
     local VECTOR = FindMetaTable("Vector")
-    function VECTOR:Middle( vec )
-        if isvector( vec ) then
-            return ( self + vec ) / 2
-        else
-            return ( self[1] + self[2] + self[3] ) / 3
-        end
+    local LerpVector = LerpVector
+    function VECTOR:Lerp( frac, b )
+        return LerpVector( frac, self, b )
     end
 
-    do
-        local LerpVector = LerpVector
-        function VECTOR:Lerp( frac, b )
-            return LerpVector( frac, self, b )
-        end
-    end
 end
 
 --[[-------------------------------------------------------------------------
@@ -568,17 +551,18 @@ end
 local ENTITY = FindMetaTable( "Entity" )
 
 do
+
     local doorClasses = {
         ["prop_testchamber_door"] = true,
         ["prop_door_rotating"] = true,
         ["func_door_rotating"] = true,
-        ["func_door"] = true,
-        ["dz_door"] = true
+        ["func_door"] = true
     }
 
     function ENTITY:IsDoor()
         return doorClasses[self:GetClass()] or false
     end
+
 end
 
 --[[-------------------------------------------------------------------------
