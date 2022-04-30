@@ -30,6 +30,20 @@ function switch( var, tbl, ... )
 end
 
 --[[-------------------------------------------------------------------------
+    table.OnlyRandom( `table` tbl )
+---------------------------------------------------------------------------]]
+
+do
+    local math_random = math.random
+    local table_GetKeys = table.GetKeys
+    function table.OnlyRandom( tab, issequential )
+        local keys = issequential and tab or table_GetKeys( tab )
+        local rand = keys[ math_random(1, #keys) ]
+        return tab[rand]
+    end
+end
+
+--[[-------------------------------------------------------------------------
     engine.GetAddon( `string` id )
 ---------------------------------------------------------------------------]]
 
@@ -210,6 +224,23 @@ do
                 end
             end
         end
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
+	player.Random
+---------------------------------------------------------------------------]]
+
+do
+
+    local player_GetHumans = player.GetHumans
+    local player_GetAll = player.GetAll
+    local math_random = math.random
+
+    function player.Random( no_bots )
+        local players = no_bots and player_GetHumans() or player_GetAll()
+        return players[math_random(1, #players)]
     end
 
 end
