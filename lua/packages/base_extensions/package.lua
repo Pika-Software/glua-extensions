@@ -1,10 +1,10 @@
-return {
-    name = "Base Extensions",
-    description = "Extending the basic functionality of GLua.",
-    version = "1.8.1",
-    dependencies = {
-        ["Environment Library"] = ">=1.0.0"
-    },
-    author = "PrikolMen:-b",
-    license = "MIT"
+Name = "Base Extensions"
+Description = "Extending the basic functionality of GLua."
+
+Author = "PrikolMen:-b"
+Version = "1.9.0"
+License = "MIT"
+
+Dependencies = {
+    ["Environment Library"] = ">=1.0.0"
 }
