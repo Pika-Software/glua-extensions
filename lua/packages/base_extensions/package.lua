@@ -2,7 +2,7 @@ Name = "Base Extensions"
 Description = "Extending the basic functionality of GLua."
 
 Author = "PrikolMen:-b"
-Version = "1.9.2"
+Version = "2.0.0"
 License = "MIT"
 
 Dependencies = {
