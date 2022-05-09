@@ -548,6 +548,44 @@ do
 end
 
 --[[-------------------------------------------------------------------------
+    ENTITY:HeadPos()
+---------------------------------------------------------------------------]]
+
+do
+
+    local head_attachments = {
+        "eyes",
+        "head",
+        "mouth"
+    }
+
+    local head_bone = "ValveBiped.Bip01_Head1"
+
+    function ENTITY:HeadPosition()
+        for num, name in ipairs( head_attachments ) do
+            local attachment_id = self:LookupAttachment( name )
+            if (attachment_id > 0) then
+                local attachment = self:GetAttachment( attachment_id )
+                return attachment.Pos, attachment.Ang
+            end
+        end
+
+        local head = self:LookupBone( head_bone )
+        if (head ~= nil) then
+            local matrix = self:GetBoneMatrix( head )
+            if (matrix ~= nil) then
+                return matrix:GetTranslation(), matrix:GetAngles()
+            else
+                return self:GetBonePosition( head )
+            end
+        end
+
+        return self:EyePos(), self:EyeAngles()
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
     ENTITY:IsProp
 ---------------------------------------------------------------------------]]
 
