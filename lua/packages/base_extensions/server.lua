@@ -41,3 +41,14 @@ do
     end
 
 end
+
+--[[---------------------------------------------------------
+	`boolean` numpad.IsToggled( ply, num )
+-----------------------------------------------------------]]
+do
+    local tonumber = tonumber
+    function numpad.IsToggled( pl, num )
+        if (pl.keystate == nil) then return false end
+        return pl.keystate[ tonumber( num ) ] or false
+    end
+end
