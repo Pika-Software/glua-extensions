@@ -27,21 +27,6 @@ function game.Restart()
     game.ConsoleCommand("_restart\n")
 end
 
---[[-------------------------------------------------------------------------
-    GM:OnPlayerDropWeapon( ply, wep, target, velocity )
----------------------------------------------------------------------------]]
-do
-
-    local PLAYER = FindMetaTable( "Player" )
-    local drop_weapon = environment.saveFunc( "PLAYER.DropWeapon", PLAYER.DropWeapon )
-
-    function PLAYER:DropWeapon( ... )
-        hook.Run( "OnPlayerDropWeapon", self, ... )
-        return drop_weapon( self, ... )
-    end
-
-end
-
 --[[---------------------------------------------------------
 	`boolean` numpad.IsToggled( ply, num )
 -----------------------------------------------------------]]
