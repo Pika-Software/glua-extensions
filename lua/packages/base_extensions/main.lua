@@ -698,6 +698,25 @@ do
 
 end
 
+/*
+    MySQL Debug
+*/
+do
+
+    local debug = CreateConVar( "mysql_debug", "0", FCVAR_NONE, " - Enables displaying mysql errors.", 0, 1 ):GetInt()
+    cvars.AddChangeCallback("mysql_debug", function( name, old, new )
+        debug = new == "1"
+    end, packageName)
+
+    sql.m_strError = nil
+    setmetatable(sql, { __newindex = function( table, key, value )
+        if (debug) and (key == "m_strError") and value then
+            print("[SQL Error] " .. value )
+        end
+    end })
+
+end
+
 --[[-------------------------------------------------------------------------
     Loading Other Files
 ---------------------------------------------------------------------------]]
