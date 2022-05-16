@@ -1,3 +1,5 @@
+local logger = GPM.Logger( "Base Extensions" )
+
 --[[-------------------------------------------------------------------------
     `boolean` game.ChangeMap( `string` map )
 ---------------------------------------------------------------------------]]
@@ -5,9 +7,7 @@
 function game.ChangeMap( str )
     local mapName = str:Replace( ".bsp", "" )
     if game.HasMap( mapName ) then
-        if console and isfunction( console.log ) then
-            console.log( game.GetMap(), " -> ", mapName ):setTag( "Map Сhange" )
-        end
+        logger:info( "Map change: {1} -> {2}", game.GetMap(), mapName )
 
         timer.Simple(0, function()
             RunConsoleCommand( "changelevel", mapName )
