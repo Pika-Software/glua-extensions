@@ -46,6 +46,72 @@ do
 end
 
 --[[-------------------------------------------------------------------------
+    table.FastCopyList( `table` tbl )
+---------------------------------------------------------------------------]]
+
+do
+    local ipairs = ipairs
+    function table.FastCopyList( tab )
+        local copy = {}
+        for key, value in ipairs( tab ) do
+            copy[ key ] = value
+        end
+
+        return copy
+    end
+end
+
+--[[-------------------------------------------------------------------------
+    table.FastCopy( `table` tbl, `boolean` issequential )
+---------------------------------------------------------------------------]]
+
+do
+    local pairs = pairs
+    function table.FastCopy( tab, issequential )
+        if (issequential) then
+            return table.FastCopyList( tab )
+        end
+
+        local copy = {}
+        for key, value in pairs( tab ) do
+            copy[ key ] = value
+        end
+
+        return copy
+    end
+end
+
+-- http://lua-users.org/wiki/CopyTable
+--[[-------------------------------------------------------------------------
+    table.DeepCopy( `table` tbl )
+---------------------------------------------------------------------------]]
+
+do
+
+    local getmetatable = getmetatable
+    local setmetatable = setmetatable
+    local table_type = "table"
+    local type = type
+    local next = next
+
+    function table.DeepCopy( tab )
+        if (type( tab ) == table_type) then
+            local copy = {}
+            for key, value in next, tab, nil do
+                copy[ table.DeepCopy( key ) ] = table.DeepCopy( value )
+            end
+
+            setmetatable( copy, table.DeepCopy( getmetatable(tab) ) )
+
+            return copy
+        end
+
+        return tab
+    end
+
+end
+
+--[[-------------------------------------------------------------------------
     engine.GetAddon( `string` id )
 ---------------------------------------------------------------------------]]
 
@@ -548,6 +614,19 @@ do
 end
 
 --[[-------------------------------------------------------------------------
+    ENTITY:DisableMove
+---------------------------------------------------------------------------]]
+function ENTITY:DisableMove()
+    self:SetMoveType( MOVETYPE_NONE )
+
+    local phys = self:GetPhysicsObject()
+    if IsValid( phys ) then
+        phys:EnableMotion( false )
+        phys:EnableDrag( false )
+    end
+end
+
+--[[-------------------------------------------------------------------------
     ENTITY:HeadPos()
 ---------------------------------------------------------------------------]]
 
@@ -703,7 +782,7 @@ end
 */
 do
 
-    local debug = CreateConVar( "mysql_debug", "0", FCVAR_NONE, " - Enables displaying mysql errors.", 0, 1 ):GetInt()
+    local debug = CreateConVar( "mysql_debug", "0", FCVAR_NONE, " - Enables displaying mysql errors.", 0, 1 ):GetBool()
     cvars.AddChangeCallback("mysql_debug", function( name, old, new )
         debug = new == "1"
     end, packageName)
