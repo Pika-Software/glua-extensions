@@ -376,6 +376,17 @@ do
 end
 
 --[[-------------------------------------------------------------------------
+    `vector` mins `vector` maxs game.GetWorldSize()
+---------------------------------------------------------------------------]]
+
+function game.GetWorldSize()
+    local world = game.GetWorld()
+    if (world ~= nil) then
+        return world:GetInternalVariable( "m_WorldMins" ), world:GetInternalVariable( "m_WorldMaxs" )
+    end
+end
+
+--[[-------------------------------------------------------------------------
     string.Hash( `string` str ) - string to hash
 ---------------------------------------------------------------------------]]
 
