@@ -778,6 +778,33 @@ do
 end
 
 /*
+    `boolean` file.IsMap( `string` path )
+*/
+function file.IsMap( path )
+    local len = #path
+    return path:sub( len - 3, len ) == ".bsp"
+end
+
+/*
+    `boolean` file.IsGMA( `string` path )
+*/
+function file.IsGMA( path )
+    local len = #path
+    return path:sub( len - 3, len ) == ".gma"
+end
+
+/*
+    `string` string.GetFileNameFromPath( `string` str )
+*/
+do
+    local string_GetFileFromFilename = string.GetFileFromFilename
+    function string.GetFileNameFromPath( str )
+        local file_name = string_GetFileFromFilename( str )
+        return file_name:sub( 1, #file_name - 4 )
+    end
+end
+
+/*
     MySQL Debug
 */
 do
