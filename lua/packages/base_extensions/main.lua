@@ -1,48 +1,17 @@
-local packageName = "Base Extensions"
-local logger = GPM.Logger( packageName )
-
 local ipairs = ipairs
-local assert = assert
 local type = type
 
---[[-------------------------------------------------------------------------
-    switch for glua
----------------------------------------------------------------------------]]
-
-function switch( var, tbl, ... )
-    local func = tbl[ var ]
-    if (func == nil) then
-        local default = tbl.default
-        if (default ~= nil) then
-            assert( type( default ) == "function", "Bad default var! Must be function or nil.")
-            return default( ... )
-        end
-
-        local numberDefault = tbl[0]
-        if (numberDefault ~= nil) then
-            assert( type( numberDefault ) == "function", "Bad 0 default key! Must be function or nil.")
-            return numberDefault( ... )
-        end
-
-        return
-    end
-    assert( type( func ) == "function", "Bad case - " .. tostring( var ) .. "! Must be function.")
-
-    return func( ... )
-end
-
---[[-------------------------------------------------------------------------
-    table.OnlyRandom( `table` tbl )
----------------------------------------------------------------------------]]
-
 do
+
     local math_random = math.random
     local table_GetKeys = table.GetKeys
+
     function table.OnlyRandom( tab, issequential )
         local keys = issequential and tab or table_GetKeys( tab )
         local rand = keys[ math_random(1, #keys) ]
         return tab[rand]
     end
+
 end
 
 --[[-------------------------------------------------------------------------
@@ -111,96 +80,82 @@ do
 
 end
 
---[[-------------------------------------------------------------------------
-    engine.GetAddon( `string` id )
----------------------------------------------------------------------------]]
-
+-- engine.GetAddon( wsid )
 do
+
     local engine_GetAddons = engine.GetAddons
-    function engine.GetAddon( id )
-        for num, addon in ipairs( engine_GetAddons() ) do
-            if (addon["wsid"] == id) then
-                return addon
-            end
-        end
-    end
-end
 
---[[-------------------------------------------------------------------------
-    engine.GetGMAFiles( `string` path )
----------------------------------------------------------------------------]]
-
-do
-
-    local empty = {}
-    local game_MountGMA = game.MountGMA
-    function engine.GetGMAFiles( path )
-        local ok, files = game_MountGMA( path )
-        return ok and files or empty
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-    engine.GetAddonFiles( `string` id )
----------------------------------------------------------------------------]]
-
-do
-
-    local empty = {}
-    local engine_GetAddon = engine.GetAddon
-    local engine_GetGMAFiles = engine.GetGMAFiles
-
-    function engine.GetAddonFiles( id )
-        local addon = engine_GetAddon( id )
-        if (addon == nil) then
-            return empty
-        end
-
-        return engine_GetGMAFiles( addon.file )
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-	Net tables compress method by DefaultOS#5913
----------------------------------------------------------------------------]]
-
-do
-
-    local util_TableToJSON = util.TableToJSON
-    local util_Compress = util.Compress
-    local net_WriteUInt = net.WriteUInt
-    local net_WriteData = net.WriteData
-
-    function net.WriteCompressTable( tbl )
-        if (type( tbl ) == "table") then
-            local data = util_Compress( util_TableToJSON( tbl ) )
-            net_WriteUInt( #data, 16 )
-            net_WriteData( data, #data )
+    function engine.GetAddon( wsid )
+        for _, tbl in ipairs( engine_GetAddons() ) do
+            if tbl.wsid == wsid then return tbl end
         end
     end
 
 end
 
-do
+-- engine.GetGMAFiles( `string` path )
+-- do
 
-    local util_JSONToTable = util.JSONToTable
-    local util_Decompress = util.Decompress
-    local net_ReadData = net.ReadData
-    local net_ReadUInt = net.ReadUInt
+--     local empty = {}
+--     local game_MountGMA = game.MountGMA
+--     function engine.GetGMAFiles( path )
+--         local ok, files = game_MountGMA( path )
+--         return ok and files or empty
+--     end
 
-    function net.ReadCompressTable()
-        local len = net_ReadUInt(16)
-        return util_JSONToTable(util_Decompress(net_ReadData(len)))
-    end
+-- end
 
-end
+-- engine.GetAddonFiles( id )
+-- do
 
---[[-------------------------------------------------------------------------
-	IMaterial improvements
----------------------------------------------------------------------------]]
+--     local empty = {}
+--     local engine_GetAddon = engine.GetAddon
+--     local engine_GetGMAFiles = engine.GetGMAFiles
 
+--     function engine.GetAddonFiles( id )
+--         local addon = engine_GetAddon( id )
+--         if (addon == nil) then
+--             return empty
+--         end
+
+--         return engine_GetGMAFiles( addon.file )
+--     end
+
+-- end
+
+-- Net tables compress method by DefaultOS#5913
+-- do
+
+--     local util_TableToJSON = util.TableToJSON
+--     local util_Compress = util.Compress
+--     local net_WriteUInt = net.WriteUInt
+--     local net_WriteData = net.WriteData
+
+--     function net.WriteCompressTable( tbl )
+--         if (type( tbl ) == "table") then
+--             local data = util_Compress( util_TableToJSON( tbl ) )
+--             net_WriteUInt( #data, 16 )
+--             net_WriteData( data, #data )
+--         end
+--     end
+
+-- end
+
+-- do
+
+--     local util_JSONToTable = util.JSONToTable
+--     local util_Decompress = util.Decompress
+--     local net_ReadData = net.ReadData
+--     local net_ReadUInt = net.ReadUInt
+
+--     function net.ReadCompressTable()
+--         local len = net_ReadUInt(16)
+--         return util_JSONToTable(util_Decompress(net_ReadData(len)))
+--     end
+
+-- end
+
+-- IMaterial improvements
 do
 
     local IMATERIAL = FindMetaTable( "IMaterial" )
@@ -218,45 +173,27 @@ do
 
 end
 
---[[-------------------------------------------------------------------------
-    concommand.Exists
----------------------------------------------------------------------------]]
+-- concommand.Exists( name )
 do
+
     local concommand_GetTable = concommand.GetTable
+
     function concommand.Exists( name )
         return concommand_GetTable()[ name ] ~= nil
     end
+
 end
 
---[[-------------------------------------------------------------------------
-    gamemode.GetName & engine.GetGamemodeTitle
----------------------------------------------------------------------------]]
-do
-    local engine_GetGamemodes = engine.GetGamemodes
-    function gamemode.GetTitle( name )
-        for num, tbl in ipairs( engine_GetGamemodes() ) do
-            if (tbl.name == name) then
-                return tbl.title or name
-            end
-        end
-    end
-
-    engine.GetGamemodeTitle = gamemode.GetTitle
-end
-
---[[-------------------------------------------------------------------------
-	ents.closest
----------------------------------------------------------------------------]]
-
+-- ents.closest( tbl, pos )
 do
 
     local math_huge = math.huge
     function ents.closest( tbl, pos )
         local distance, entity = math_huge
 
-        for num, ent in ipairs( tbl ) do
+        for _, ent in ipairs( tbl ) do
             local dist = ent:GetPos():DistToSqr( pos )
-            if (dist < distance) then
+            if dist < distance then
                 distance = dist
                 entity = ent
             end
@@ -267,129 +204,116 @@ do
 
 end
 
---[[-------------------------------------------------------------------------
-    player.GetListenServerHost
----------------------------------------------------------------------------]]
-
+-- player.GetListenServerHost
 do
 
     if game.SinglePlayer() then
+
         local Entity = Entity
+
         function player.GetListenServerHost()
             return Entity( 1 )
         end
+
     else
-        local isDedicated = game.IsDedicated()
-        if isDedicated then
+
+        if game.IsDedicated() then
             player.GetListenServerHost = environment.loadFunc()
         else
+
             local player_GetHumans = player.GetHumans
+
             function player.GetListenServerHost()
-                for num, ply in ipairs( player_GetHumans() ) do
-                    if type( ply.IsListenServerHost ) == "function" and ply:IsListenServerHost() then
-                        return ply
-                    end
+                for _, ply in ipairs( player_GetHumans() ) do
+                    if type( ply.IsListenServerHost ) ~= "function" then continue end
+                    if ply:IsListenServerHost() then return ply end
                 end
             end
+
         end
+
     end
 
 end
 
---[[-------------------------------------------------------------------------
-	player.Random
----------------------------------------------------------------------------]]
-
+-- player.Random( noBots )
 do
 
     local player_GetHumans = player.GetHumans
     local player_GetAll = player.GetAll
     local math_random = math.random
 
-    function player.Random( no_bots )
-        local players = no_bots and player_GetHumans() or player_GetAll()
-        return players[math_random(1, #players)]
+    function player.Random( noBots )
+        local players = noBots and player_GetHumans() or player_GetAll()
+        return players[ math_random( 1, #players ) ]
     end
 
 end
-
---[[-------------------------------------------------------------------------
-    game.AmmoList
----------------------------------------------------------------------------]]
 
 local table_insert = table.insert
 
-do
+-- game.AmmoList
+-- do
 
-    local game_GetAmmoName = game.GetAmmoName
-    function game.AmmoList()
-        local last = game_GetAmmoName(1)
-        local ammoList = {last}
+--     local game_GetAmmoName = game.GetAmmoName
 
-        while (last ~= nil) do
-            last = game_GetAmmoName( table_insert( ammoList, last ) )
-        end
+--     function game.AmmoList()
+--         local last = game_GetAmmoName( 1 )
+--         local ammoList = { last }
 
-        return ammoList
-    end
+--         while last ~= nil do
+--             last = game_GetAmmoName( table_insert( ammoList, last ) )
+--         end
 
-end
+--         return ammoList
+--     end
 
---[[-------------------------------------------------------------------------
-    game.GetMaps()
----------------------------------------------------------------------------]]
+-- end
 
-do
+-- game.GetMaps()
+-- do
 
-    local file_Find = file.Find
-    function game.GetMaps()
-        local maps = {}
-        for num, fl in ipairs( file_Find("maps/*", "GAME") ) do
-            if (fl:GetExtensionFromFilename() == "bsp") then
-                table_insert( maps, fl:sub( 1, #fl - 4 ) )
-            end
-        end
+--     local file_Find = file.Find
 
-        return maps
-    end
+--     function game.GetMaps()
+--         local maps = {}
+--         for num, fl in ipairs( file_Find( "maps/*", "GAME" ) ) do
+--             if fl:GetExtensionFromFilename() == "bsp" then
+--                 table_insert( maps, fl:sub( 1, #fl - 4 ) )
+--             end
+--         end
 
-end
+--         return maps
+--     end
 
---[[-------------------------------------------------------------------------
-    game.HasMap( `string` map )
----------------------------------------------------------------------------]]
+-- end
 
-do
+-- game.HasMap( map )
+-- do
 
-    local game_GetMaps = game.GetMaps
-    function game.HasMap( str )
-        local mapName = str:Replace( ".bsp", "" )
-        for num, map in ipairs( game_GetMaps() ) do
-            if (map == mapName) then
-                return true
-            end
-        end
+--     local game_GetMaps = game.GetMaps
+--     function game.HasMap( str )
+--         local mapName = str:Replace( ".bsp", "" )
+--         for num, map in ipairs( game_GetMaps() ) do
+--             if (map == mapName) then
+--                 return true
+--             end
+--         end
 
-        return false
-    end
+--         return false
+--     end
 
-end
+-- end
 
---[[-------------------------------------------------------------------------
-    `vector` mins `vector` maxs game.GetWorldSize()
----------------------------------------------------------------------------]]
-
+-- game.GetWorldSize()
 function game.GetWorldSize()
     local world = game.GetWorld()
-    if (world ~= nil) then
-        return world:GetInternalVariable( "m_WorldMins" ), world:GetInternalVariable( "m_WorldMaxs" )
-    end
+    if not world then return end
+
+    return world:GetInternalVariable( "m_WorldMins" ), world:GetInternalVariable( "m_WorldMaxs" )
 end
 
---[[-------------------------------------------------------------------------
-    string.Hash( `string` str ) - string to hash
----------------------------------------------------------------------------]]
-
+-- string.Hash( str )
 do
 
     local math_fmod = math.fmod
@@ -404,10 +328,7 @@ do
 
 end
 
---[[-------------------------------------------------------------------------
-    string.FormatSeconds( `string` sec ) - seconds to formated time string
----------------------------------------------------------------------------]]
-
+-- string.FormatSeconds( `string` sec ) - seconds to formated time string
 do
 
     local full = "%s:%s:%s"
@@ -437,70 +358,53 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-    string.FindFromTable( `string` str, `table` tbl )
----------------------------------------------------------------------------]]
-
-function string.FindFromTable( str, tbl )
-	for num, char in ipairs( tbl ) do
-		if str:find( char ) then
-			return true
-		end
-	end
-
-	return false
-end
-
---[[-------------------------------------------------------------------------
     string.charCount - returns char counts from string
 ---------------------------------------------------------------------------]]
 
 function string.charCount( str, char )
-	assert( type( str ) == "string", "bad argument #1 (string expected)" )
-	assert( type( char ) == "string", "bad argument #2 (string expected)" )
+    ArgAssert( str, 1, "string" )
+    ArgAssert( char, 2, "string" )
 
-    local count = 0
-	for num, chr in ipairs( str:ToTable() ) do
-		if (chr == char) then
-			count = count + 1
-		end
-	end
+    local counter = 0
+    for i = 1, #str do
+        if str[ i ] == char then
+            counter = counter + 1
+        end
+    end
 
-	return count
+    return count
 end
 
---[[-------------------------------------------------------------------------
-	table module improvements
----------------------------------------------------------------------------]]
-
+-- table
 function table.Sub( tbl, offset, len )
-	local newTbl = {}
-	for i = 1, len do
-		newTbl[i] = tbl[i + offset]
-	end
+    local newTbl = {}
+    for i = 1, len do
+        newTbl[i] = tbl[i + offset]
+    end
 
-	return newTbl
+    return newTbl
 end
 
 function table.Min( tbl )
-	local min = nil
-	for key, value in ipairs( tbl ) do
-		if (min == nil) or (value < min) then
-			min = value
-		end
-	end
+    local min = nil
+    for key, value in ipairs( tbl ) do
+        if (min == nil) or (value < min) then
+            min = value
+        end
+    end
 
-	return min
+    return min
 end
 
 function table.Max( tbl )
-	local max = nil
-	for key, value in ipairs( tbl ) do
-		if (max == nil) or (value > max) then
-			max = value
-		end
-	end
+    local max = nil
+    for key, value in ipairs( tbl ) do
+        if (max == nil) or (value > max) then
+            max = value
+        end
+    end
 
-	return max
+    return max
 end
 
 do
@@ -523,37 +427,13 @@ do
 end
 
 --[[-------------------------------------------------------------------------
-	C# math.Map = Lua math.Remap
+    C# math.Map = Lua math.Remap
 ---------------------------------------------------------------------------]]
 
 math.Map = math.Remap
 
 --[[-------------------------------------------------------------------------
-    VMatrix Extension
----------------------------------------------------------------------------]]
-
-do
-
-    local VMATRIX = FindMetaTable( "VMatrix" )
-    local vector_origin = vector_origin
-    local angle_zero = angle_zero
-
-    local __scale = Vector( 1, 1 )
-    function VMATRIX:Reset( scale )
-        self:Zero()
-        self:SetScale( scale or __scale )
-        self:SetAngles( angle_zero )
-        self:SetTranslation( vector_origin )
-        self:SetField(1, 1, 1)
-        self:SetField(2, 2, 1)
-        self:SetField(3, 3, 1)
-        self:SetField(4, 4, 1)
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-	Angle improvements
+    Angle improvements
 ---------------------------------------------------------------------------]]
 
 do
@@ -567,10 +447,7 @@ do
 
 end
 
---[[-------------------------------------------------------------------------
-	Vector improvements
----------------------------------------------------------------------------]]
-
+-- vector
 do
 
     local VECTOR = FindMetaTable("Vector")
@@ -580,32 +457,6 @@ do
     end
 
 end
-
---[[-------------------------------------------------------------------------
-    Easy net.Start
----------------------------------------------------------------------------]]
-
-if (SERVER) then
-
-    local net_Start = environment.saveFunc( "net.Start", net.Start )
-
-    local util_AddNetworkString = util.AddNetworkString
-    local util_NetworkStringToID = util.NetworkStringToID
-
-    function net.Start( name, bool )
-        if (util_NetworkStringToID( name ) == 0) then
-            util_AddNetworkString( name )
-            logger:debug( "Network string created: {1}", name )
-        end
-
-        return net_Start( name, bool )
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-    ENTITY:IsDoor
----------------------------------------------------------------------------]]
 
 local ENTITY = FindMetaTable( "Entity" )
 
@@ -623,61 +474,6 @@ do
     end
 
 end
-
---[[-------------------------------------------------------------------------
-    ENTITY:DisableMove
----------------------------------------------------------------------------]]
-function ENTITY:DisableMove()
-    self:SetMoveType( MOVETYPE_NONE )
-
-    local phys = self:GetPhysicsObject()
-    if IsValid( phys ) then
-        phys:EnableMotion( false )
-        phys:EnableDrag( false )
-    end
-end
-
---[[-------------------------------------------------------------------------
-    ENTITY:HeadPos()
----------------------------------------------------------------------------]]
-
-do
-
-    local head_attachments = {
-        "eyes",
-        "head",
-        "mouth"
-    }
-
-    local head_bone = "ValveBiped.Bip01_Head1"
-
-    function ENTITY:HeadPosition()
-        for num, name in ipairs( head_attachments ) do
-            local attachment_id = self:LookupAttachment( name )
-            if (attachment_id > 0) then
-                local attachment = self:GetAttachment( attachment_id )
-                return attachment.Pos, attachment.Ang
-            end
-        end
-
-        local head = self:LookupBone( head_bone )
-        if (head ~= nil) then
-            local matrix = self:GetBoneMatrix( head )
-            if (matrix ~= nil) then
-                return matrix:GetTranslation(), matrix:GetAngles()
-            else
-                return self:GetBonePosition( head )
-            end
-        end
-
-        return self:EyePos(), self:EyeAngles()
-    end
-
-end
-
---[[-------------------------------------------------------------------------
-    ENTITY:IsProp
----------------------------------------------------------------------------]]
 
 do
 
@@ -713,134 +509,69 @@ do
 
     local file_Exists = file.Exists
 
-    --[[-------------------------------------------------------------------------
-        game.MapHasNav( `string` map )
-    ---------------------------------------------------------------------------]]
+    function game.MapHasNav( mapName )
+        ArgAssert( mapName, 1, "string" )
+        return file_Exists( "maps/" .. mapName .. ".nav" )
+    end
+
+end
+
+-- MySQL Debug
+-- do
+
+--     local debug = CreateConVar( "mysql_debug", "0", FCVAR_NONE, " - Enables displaying mysql errors.", 0, 1 ):GetBool()
+--     cvars.AddChangeCallback("mysql_debug", function( name, old, new )
+--         debug = new == "1"
+--     end, gpm.Package:GetName() )
+
+--     sql.m_strError = nil
+--     setmetatable(sql, { __newindex = function( table, key, value )
+--         if debug and (key == "m_strError") and value then
+--             print("[SQL Error] " .. value )
+--         end
+--     end })
+
+-- end
+
+if SERVER then
+    -- game.ChangeMap( `string` map )
+    -- function game.ChangeMap( str )
+    --     local mapName = str:Replace( ".bsp", "" )
+    --     if game.HasMap( mapName ) then
+    --         logger:info( "Map change: {1} -> {2}", game.GetMap(), mapName )
+
+    --         timer.Simple( 0, function()
+    --             RunConsoleCommand( "changelevel", mapName )
+    --         end )
+
+    --         return true
+    --     end
+
+    --     return false
+    -- end
+
+    -- game.Restart()
+    function game.Restart()
+        game.ConsoleCommand( "_restart\n" )
+    end
+
+    -- numpad.IsToggled( ply, num )
+    function numpad.IsToggled( ply, num )
+        if not pl.keystate then return false end
+        return pl.keystate[ num ]
+    end
+end
+
+if CLIENT then
+
+    ents.Create = ents.CreateClientside
 
     do
-
-        function game.MapHasNav( map )
-            assert( type( map ) == "string", "bad argument #1 (string expected)" )
-            return file_Exists( "maps/" .. map .. ".nav" )
+        local render_GetLightColor = render.GetLightColor
+        function render.GetLightLevel( origin )
+            local vec = render_GetLightColor( origin )
+            return ( vec[ 1 ] + vec[ 2 ] + vec[ 3 ] ) / 3
         end
-
     end
 
-    --[[-------------------------------------------------------------------------
-        Mdls pre-caching
-    ---------------------------------------------------------------------------]]
-
-    do
-
-        local util_PrecacheModel = util.PrecacheModel
-
-        local precacheLimit = 4096
-        local precached_mdls = {}
-
-        function Model( path )
-            assert( type( path ) == "string", "bad argument #1 (string expected)" )
-            assert( precacheLimit > 0, "Model precache limit reached! ( > 4096 )" )
-
-            if (precached_mdls[ path ] == nil) and file_Exists( path, "GAME" ) then
-                logger:debug( "Model Precached -> {1}", path )
-                precacheLimit = precacheLimit - 1
-                precached_mdls[ path ] = true
-
-                util_PrecacheModel( path )
-            end
-
-            return path
-        end
-
-    end
-
-    --[[-------------------------------------------------------------------------
-        Sounds pre-caching
-    ---------------------------------------------------------------------------]]
-
-    do
-
-        local world = NULL
-        hook.Add("InitPostEntity", packageName, function()
-            world = game.GetWorld()
-        end)
-
-        local precached_sounds = {}
-        local util_PrecacheSound = environment.saveFunc( "util.PrecacheSound", util.PrecacheSound )
-
-        function util.PrecacheSound( path )
-            assert( type( path ) == "string", "bad argument #1 (string expected)" )
-            if path:Replace( " ", "" ) == "" then return path end
-
-            if (precached_sounds[ path ] == nil) and file_Exists( path, "GAME" ) then
-                logger:debug( "Sound Precached -> {1}", path )
-                precached_sounds[ path ] = true
-
-                if (world ~= nil) then
-                    world:EmitSound( path, 0, 100, 0 )
-                end
-            end
-
-            return util_PrecacheSound( path )
-        end
-
-    end
-
-end
-
-/*
-    `boolean` file.IsMap( `string` path )
-*/
-function file.IsMap( path )
-    local len = #path
-    return path:sub( len - 3, len ) == ".bsp"
-end
-
-/*
-    `boolean` file.IsGMA( `string` path )
-*/
-function file.IsGMA( path )
-    local len = #path
-    return path:sub( len - 3, len ) == ".gma"
-end
-
-/*
-    `string` string.GetFileNameFromPath( `string` str )
-*/
-do
-    local string_GetFileFromFilename = string.GetFileFromFilename
-    function string.GetFileNameFromPath( str )
-        local file_name = string_GetFileFromFilename( str )
-        return file_name:sub( 1, #file_name - 4 )
-    end
-end
-
-/*
-    MySQL Debug
-*/
-do
-
-    local debug = CreateConVar( "mysql_debug", "0", FCVAR_NONE, " - Enables displaying mysql errors.", 0, 1 ):GetBool()
-    cvars.AddChangeCallback("mysql_debug", function( name, old, new )
-        debug = new == "1"
-    end, packageName)
-
-    sql.m_strError = nil
-    setmetatable(sql, { __newindex = function( table, key, value )
-        if (debug) and (key == "m_strError") and value then
-            print("[SQL Error] " .. value )
-        end
-    end })
-
-end
-
---[[-------------------------------------------------------------------------
-    Loading Other Files
----------------------------------------------------------------------------]]
-
-if (SERVER) then
-    AddCSLuaFile( "packages/base_extensions/client.lua" )
-    include( "packages/base_extensions/server.lua" )
-else
-    include( "packages/base_extensions/client.lua" )
 end
