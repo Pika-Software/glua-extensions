@@ -654,13 +654,12 @@ end
 
 -- http.Query( tbl )
 function http.Query( tbl )
-    local out = ""
-
+    local result = nil
     for key, value in pairs( tbl ) do
-        out = out .. "&" .. key .. "=" .. value
+        result = ( result and ( result .. "&" ) or "" ) .. key .. "=" .. value
     end
 
-    return "?" .. out
+    return "?" .. result
 end
 
 -- http.PrepareUpload( content, filename )
