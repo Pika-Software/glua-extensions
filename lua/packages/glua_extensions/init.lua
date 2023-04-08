@@ -619,3 +619,58 @@ do
     end
 
 end
+
+local http = http
+
+-- http.Encode( str )
+function http.Encode( str )
+    return string.gsub( string.gsub( str, "[^%w _~%.%-]", function( char )
+        return string.format( "%%%02X", string.byte( char ) )
+    end ), " ", "+" )
+end
+
+-- http.Decode( str )
+do
+
+    local tonumber = tonumber
+
+    function http.Decode( str )
+        return string.gsub( string.gsub( str, "+", " " ), "%%(%x%x)", function( c )
+            return string.char( tonumber( c, 16 ) )
+        end )
+    end
+
+end
+
+-- http.ParseQuery( str )
+function http.ParseQuery( str )
+    local query = {}
+    for key, value in string.gmatch( str, "([^&=?]-)=([^&=?]+)" ) do
+        query[ key ] = http.Decode( value )
+    end
+
+    return query
+end
+
+-- http.Query( tbl )
+function http.Query( tbl )
+    local out = ""
+
+    for key, value in pairs( tbl ) do
+        out = out .. "&" .. key .. "=" .. value
+    end
+
+    return "?" .. out
+end
+
+-- http.PrepareUpload( content, filename )
+function http.PrepareUpload( content, filename )
+    local boundary = "fboundary" .. math.random( 1, 100 )
+    local header_bound = "Content-Disposition: form-data; name=\'file\'; filename=\'" .. filename .. "\'\r\nContent-Type: application/octet-stream\r\n"
+    local data = string.format( "--%s\r\n%s\r\n%s\r\n--%s--\r\n", boundary, header_bound, content, boundary )
+
+    return {
+        { "Content-Length", #data },
+        { "Content-Type", "multipart/form-data; boundary=" .. boundary }
+    }, data
+end

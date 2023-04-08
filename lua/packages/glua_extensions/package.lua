@@ -1,2 +1,3 @@
 name = "GLua Extensions"
-version = 2
+main = "init.lua"
+version = 3
