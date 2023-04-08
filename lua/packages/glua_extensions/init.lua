@@ -114,26 +114,6 @@ function table.Sub( tbl, offset, len )
     return newTbl
 end
 
--- table.GetMin( tbl )
-function table.GetMin( tbl )
-    local min = nil
-    for _, value in ipairs( tbl ) do
-        if min == nil or value < min then min = value end
-    end
-
-    return min
-end
-
--- table.GetMax( tbl )
-function table.GetMax( tbl )
-    local max = nil
-    for _, value in ipairs( tbl ) do
-        if max == nil or value > max then max = value end
-    end
-
-    return max
-end
-
 -- table.Lookup( tbl, path, default )
 function table.Lookup( tbl, path, default )
     for _, key in ipairs( string.Split( path, "." ) ) do
