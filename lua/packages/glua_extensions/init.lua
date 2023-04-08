@@ -321,8 +321,8 @@ do
 
 end
 
--- ents.closest( tbl, pos )
-function ents.closest( tbl, pos )
+-- ents.Closest( tbl, pos )
+function ents.Closest( tbl, pos )
     local distance, result = nil, nil
 
     for _, ent in ipairs( tbl ) do
