@@ -434,7 +434,10 @@ if SERVER then
 
     hook.Add( "SetupMove", "gpm.glua_extensions", function( ply, _, cmd )
         if queue[ ply ] and not cmd:IsForced() then
-            queue[ ply ] = nil; hook.Run( "PlayerInitialized", ply )
+            ply:SetNW2Bool( "m_pInitialized", true )
+            queue[ ply ] = nil
+
+            hook.Run( "PlayerInitialized", ply )
         end
     end )
 
