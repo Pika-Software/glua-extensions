@@ -427,6 +427,7 @@ if SERVER then
 
     -- GM:PlayerInitialized( ply )
     local queue = {}
+
     hook.Add( "PlayerInitialSpawn", "gpm.glua_extensions", function( ply )
         queue[ ply ] = true
     end )
