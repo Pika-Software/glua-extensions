@@ -259,6 +259,7 @@ do
         return players[ math.random( 1, #players ) ]
     end
 
+    -- player.GetListenServerHost()
     if game.SinglePlayer() then
 
         local Entity = Entity
