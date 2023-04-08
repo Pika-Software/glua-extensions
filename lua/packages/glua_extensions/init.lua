@@ -42,9 +42,7 @@ function string.Hash( str )
     return hash
 end
 
---[[-------------------------------------------------------------------------
-    table.FastCopy( `table` tbl, `boolean` issequential )
----------------------------------------------------------------------------]]
+-- table.FastCopy( tbl, issequential, buffer )
 function table.FastCopy( tbl, issequential, buffer )
     local copy = {}
 
@@ -86,11 +84,7 @@ function table.Empty( tbl )
     end
 end
 
--- http://lua-users.org/wiki/CopyTable
---[[-------------------------------------------------------------------------
-    table.DeepCopy( `table` tbl )
----------------------------------------------------------------------------]]
-
+-- table.DeepCopy( tbl )
 do
 
     local setmetatable = setmetatable
