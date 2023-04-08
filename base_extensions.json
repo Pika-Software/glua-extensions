@@ -1,6 +1,0 @@
-{
-  "name": "Base Extensions",
-  "files": {
-    "lua/packages/base_extensions/init.lua": "https://raw.githubusercontent.com/Pika-Software/gpm_base_extensions/main/lua/packages/base_extensions/init.lua"
-  }
-}

@@ -1,0 +1,6 @@
+{
+  "name": "GLua Extensions",
+  "files": {
+    "lua/packages/base_extensions/init.lua": "https://raw.githubusercontent.com/Pika-Software/glua_extensions/main/lua/packages/glua_extensions/init.lua"
+  }
+}
