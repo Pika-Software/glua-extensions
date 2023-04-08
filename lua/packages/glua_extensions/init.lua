@@ -6,6 +6,7 @@ local math = math
 local game = game
 local file = file
 local util = util
+local hook = hook
 
 -- Variables
 local getmetatable = getmetatable
@@ -424,23 +425,27 @@ if SERVER then
         return pl.keystate[ num ]
     end
 
-    -- https://wiki.facepunch.com/gmod/Player:ConCommand
-    util.AddNetworkString( "PLAYER:ConCommand()" )
+    -- GM:PlayerInitialized( ply )
+    local queue = {}
+    hook.Add( "PlayerInitialSpawn", "gpm.glua_extensions", function( ply )
+        queue[ ply ] = true
+    end )
 
-    local PLAYER = FindMetaTable( "Player" )
+    hook.Add( "SetupMove", "gpm.glua_extensions", function( ply, _, cmd )
+        if queue[ ply ] and not cmd:IsForced() then
+            queue[ ply ] = nil; hook.Run( "PlayerInitialized", ply )
+        end
+    end )
 
-    function PLAYER:ConCommand( command )
-        net.Start( "Player:ConCommand" )
-            net.WriteString( command )
-        net.Send( self )
-    end
+    util.AddNetworkString( "Player:ConCommand" )
 
 end
 
 if CLIENT then
 
-    net.Receive( "Player:ConCommand", function()
-        LocalPlayer():ConCommand( net.ReadString() )
+    -- GM:PlayerInitialized( ply )
+    hook.Add( "InitPostEntity", "gpm.glua_extensions", function()
+        hook.Run( "PlayerInitialized", LocalPlayer() )
     end )
 
     -- ents.Create aliase for client
@@ -456,6 +461,162 @@ if CLIENT then
             return ( vec[ 1 ] + vec[ 2 ] + vec[ 3 ] ) / 3
 
         end
+    end
+
+    -- GM:ScreenResolutionChanged( width, height, oldWidth, oldHeight )
+    do
+
+        local ScrW, ScrH = ScrW, ScrH
+        local width, height = ScrW(), ScrH()
+
+        function util.ScreenResolution()
+            return width, height
+        end
+
+        hook.Add( "OnScreenSizeChanged", "gpm.glua_extensions", function(  oldWidth, oldHeight )
+            screenWidth, screenHeight = ScrW(), ScrH()
+            hook.Run( "ScreenResolutionChanged", width, height, oldWidth, oldHeight )
+        end )
+
+    end
+
+    -- GM:GameUIToggled( currentState )
+    do
+
+        local gui_IsGameUIVisible = gui.IsGameUIVisible
+        local status = gui_IsGameUIVisible()
+
+        hook.Add( "Think", "gpm.glua_extensions", function()
+            local current = gui_IsGameUIVisible()
+            if status == current then return end
+            status = current
+
+            hook.Run( "GameUIToggled", current )
+        end )
+
+    end
+
+    -- GM:WindowFocusChanged( hasFocus )
+    do
+
+        local system_HasFocus = system.HasFocus
+        local focus = system_HasFocus()
+
+        hook.Add( "Think", "gpm.glua_extensions", function()
+            local current = system_HasFocus()
+            if focus == current then return end
+            focus = current
+
+            hook.Run( "WindowFocusChanged", current )
+        end )
+
+    end
+
+    -- GM:PlayerDisconnected( ply )
+    hook.Add( "ShutDown", "gpm.glua_extensions", function()
+        hook.Remove( "ShutDown", "gpm.glua_extensions" )
+        hook.Run( "PlayerDisconnected", LocalPlayer() )
+    end )
+
+    local language = language
+
+    -- string.Translate( str )
+    function string.Translate( str )
+        return string.gsub( str, "%#[%w._-]+", language.GetPhrase )
+    end
+
+    -- language.Exists( languageCode )
+    function language.Exists( languageCode )
+        return file.IsDir( "resource/localization/" .. languageCode, "GAME" )
+    end
+
+    -- language.GetAll()
+    do
+
+        local select = select
+
+        function language.GetAll()
+            return select( -1, file.Find( "resource/localization/*", "GAME" ) )
+        end
+
+    end
+
+    -- language.GetFlag( languageCode )
+    do
+
+        local langToCountry = {
+            ["zh-CN"] = "cn",
+            ["zh-TW"] = "tw",
+            ["es-ES"] = "es",
+            ["pt-BR"] = "br",
+            ["pt-PT"] = "pt",
+            ["sv-SE"] = "se",
+            ["da"] = "dk",
+            ["el"] = "gr",
+            ["en"] = "gb",
+            ["he"] = "il",
+            ["ja"] = "jp",
+            ["ko"] = "kr",
+            ["uk"] = "ua"
+        }
+
+        function language.GetFlag( languageCode )
+            local countryCode = langToCountry[ languageCode ] or languageCode
+
+            local filePath0 = "materials/flags16/" .. countryCode .. ".png"
+            if file.Exists( filePath0, "GAME" ) then return filePath0 end
+
+            local filePath1 = "resource/localization/" .. countryCode .. ".png"
+            if file.Exists( filePath1, "GAME" ) then return filePath1 end
+
+            return "html/img/unk_flag.png"
+        end
+
+    end
+
+    do
+
+        local gmod_language = GetConVar( "gmod_language" )
+
+        -- language.Get()
+        function language.Get()
+            return gmod_language:GetString()
+        end
+
+        -- language.Set( languageCode )
+        function language.Set( languageCode )
+            RunConsoleCommand( gmod_language:GetName(), languageCode )
+        end
+
+    end
+
+    net.Receive( "Player:ConCommand", function()
+        LocalPlayer():ConCommand( net.ReadString() )
+    end )
+
+end
+
+-- GM:LanguageChanged( languageCode, oldLanguageCode )
+cvars.AddChangeCallback( "gmod_language", function( _, old, new )
+    hook.Run( "LanguageChanged", new, old )
+end, "gpm.glua_extensions" )
+
+do
+
+    local PLAYER = FindMetaTable( "Player" )
+
+    -- Player:ConCommand( command )
+    if SERVER then
+        function PLAYER:ConCommand( command )
+            net.Start( "Player:ConCommand" )
+                net.WriteString( command )
+            net.Send( self )
+        end
+    end
+
+    -- Player:IsFullyConnected()
+    function PLAYER:IsFullyConnected()
+        return self:GetNW2Bool( "m_pInitialized", false )
     end
 
 end

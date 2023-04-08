@@ -1,2 +1,2 @@
 name = "GLua Extensions"
-version = 1
+version = 2
