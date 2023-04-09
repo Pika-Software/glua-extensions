@@ -593,6 +593,29 @@ do
         end
     end
 
+    -- Player:IsSpectator()
+    do
+
+        local TEAM_SPECTATOR = TEAM_SPECTATOR
+
+        function PLAYER:IsSpectator()
+            return self:Team() == TEAM_SPECTATOR
+        end
+
+    end
+
+
+    -- Player:IsConnecting()
+    do
+
+        local TEAM_CONNECTING = TEAM_CONNECTING
+
+        function PLAYER:IsConnecting()
+            return self:Team() == TEAM_CONNECTING
+        end
+
+    end
+
     -- Player:IsFullyConnected()
     function PLAYER:IsFullyConnected()
         return self:GetNW2Bool( "m_pInitialized", false )
