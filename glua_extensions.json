@@ -1,7 +1,7 @@
 {
     "name": "GLua Extensions",
     "files": {
-        "lua/packages/glua_extensions/package.lua": "https://raw.githubusercontent.com/Pika-Software/glua_extensions/main/lua/packages/glua_extensions/package.lua",
-        "lua/packages/glua_extensions/init.lua": "https://raw.githubusercontent.com/Pika-Software/glua_extensions/main/lua/packages/glua_extensions/init.lua"
+        "lua/packages/glua_extensions/package.lua": "https://raw.githubusercontent.com/Pika-Software/glua_extensions_package/main/lua/packages/glua_extensions/package.lua",
+        "lua/packages/glua_extensions/init.lua": "https://raw.githubusercontent.com/Pika-Software/glua_extensions_package/main/lua/packages/glua_extensions/init.lua"
     }
 }
