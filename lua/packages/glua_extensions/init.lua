@@ -186,11 +186,6 @@ function engine.GetAddon( wsid )
     end
 end
 
--- game.Restart()
-function game.Restart()
-    game.ConsoleCommand( "_restart" )
-end
-
 -- game.GetAddonFiles( wsid )
 function game.GetAddonFiles( wsid )
     local addon = engine.GetAddon( wsid )
@@ -223,7 +218,10 @@ function game.GetAmmoList()
     local result = { last }
 
     while last ~= nil do
-        last = game.GetAmmoName( table.insert( result, last ) )
+        local index = #result + 1
+        result[ index ] = last
+
+        last = game.GetAmmoName( index )
     end
 
     return result
