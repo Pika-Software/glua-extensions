@@ -2,4 +2,4 @@ name = "GLua Extensions"
 main = "init.lua"
 isolation = false
 logger = false
-version = 4
+version = 5

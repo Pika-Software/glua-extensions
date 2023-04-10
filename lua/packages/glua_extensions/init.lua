@@ -357,6 +357,7 @@ do
         ["func_door"] = true
     }
 
+    -- Entity:IsDoor()
     function ENTITY:IsDoor()
         return doors[ self:GetClass() ] or false
     end
@@ -372,8 +373,52 @@ do
         ["prop_physics_multiplayer"] = true
     }
 
+    -- Entity:IsProp()
     function ENTITY:IsProp()
         return props[ self:GetClass() ] or false
+    end
+
+end
+
+do
+
+    local PLAYER = FindMetaTable( "Player" )
+
+    -- Player:ConCommand( command )
+    if SERVER then
+        function PLAYER:ConCommand( command )
+            net.Start( "Player:ConCommand" )
+                net.WriteString( command )
+            net.Send( self )
+        end
+    end
+
+    -- Player:IsSpectator()
+    do
+
+        local TEAM_SPECTATOR = TEAM_SPECTATOR
+
+        function PLAYER:IsSpectator()
+            return self:Team() == TEAM_SPECTATOR
+        end
+
+    end
+
+
+    -- Player:IsConnecting()
+    do
+
+        local TEAM_CONNECTING = TEAM_CONNECTING
+
+        function PLAYER:IsConnecting()
+            return self:Team() == TEAM_CONNECTING
+        end
+
+    end
+
+    -- Player:IsFullyConnected()
+    function PLAYER:IsFullyConnected()
+        return self:GetNW2Bool( "m_pInitialized", false )
     end
 
 end
@@ -414,11 +459,24 @@ if SERVER then
         end
     end )
 
-    util.AddNetworkString( "Player:ConCommand" )
+end
+
+do
+
+    local CMoveData = FindMetaTable( "CMoveData" )
+
+    -- CMoveData:RemoveKey( inKey )
+    function CMoveData:RemoveKey( inKey )
+        self:SetButtons( bit.band( self:GetButtons(), bit.bnot( inKey ) ) )
+    end
 
 end
 
 if CLIENT then
+
+    net.Receive( "Player:ConCommand", function()
+        LocalPlayer():ConCommand( net.ReadString() )
+    end )
 
     -- GM:PlayerInitialized( ply )
     hook.Add( "InitPostEntity", "gpm.glua_extensions", function()
@@ -567,59 +625,12 @@ if CLIENT then
 
     end
 
-    net.Receive( "Player:ConCommand", function()
-        LocalPlayer():ConCommand( net.ReadString() )
-    end )
-
 end
 
 -- GM:LanguageChanged( languageCode, oldLanguageCode )
 cvars.AddChangeCallback( "gmod_language", function( _, old, new )
     hook.Run( "LanguageChanged", new, old )
 end, "gpm.glua_extensions" )
-
-do
-
-    local PLAYER = FindMetaTable( "Player" )
-
-    -- Player:ConCommand( command )
-    if SERVER then
-        function PLAYER:ConCommand( command )
-            net.Start( "Player:ConCommand" )
-                net.WriteString( command )
-            net.Send( self )
-        end
-    end
-
-    -- Player:IsSpectator()
-    do
-
-        local TEAM_SPECTATOR = TEAM_SPECTATOR
-
-        function PLAYER:IsSpectator()
-            return self:Team() == TEAM_SPECTATOR
-        end
-
-    end
-
-
-    -- Player:IsConnecting()
-    do
-
-        local TEAM_CONNECTING = TEAM_CONNECTING
-
-        function PLAYER:IsConnecting()
-            return self:Team() == TEAM_CONNECTING
-        end
-
-    end
-
-    -- Player:IsFullyConnected()
-    function PLAYER:IsFullyConnected()
-        return self:GetNW2Bool( "m_pInitialized", false )
-    end
-
-end
 
 local http = http
 
