@@ -350,32 +350,53 @@ do
 
     local ENTITY = FindMetaTable( "Entity" )
 
-    local doors = {
-        ["prop_testchamber_door"] = true,
-        ["prop_door_rotating"] = true,
-        ["func_door_rotating"] = true,
-        ["func_door"] = true
-    }
+    -- Entity:IsProp()
+    do
 
-    -- Entity:IsDoor()
-    function ENTITY:IsDoor()
-        return doors[ self:GetClass() ] or false
+        local classes = list.GetForEdit( "Prop Classes" )
+        classes["prop_physics_multiplayer"] = true
+        classes["prop_physics_override"] = true
+        classes["prop_dynamic_override"] = true
+        classes["prop_dynamic"] = true
+        classes["prop_ragdoll"] = true
+        classes["prop_physics"] = true
+        classes["prop_detail"] = true
+        classes["prop_static"] = true
+
+        function ENTITY:IsProp()
+            return classes[ self:GetClass() ] or false
+        end
+
     end
 
-    local props = {
-        ["prop_detail"] = true,
-        ["prop_static"] = true,
-        ["prop_physics"] = true,
-        ["prop_ragdoll"] = true,
-        ["prop_dynamic"] = true,
-        ["prop_physics_override"] = true,
-        ["prop_dynamic_override"] = true,
-        ["prop_physics_multiplayer"] = true
-    }
+    -- Entity:IsDoor()
+    do
 
-    -- Entity:IsProp()
-    function ENTITY:IsProp()
-        return props[ self:GetClass() ] or false
+        local classes = list.GetForEdit( "Door Classes" )
+        classes["prop_testchamber_door"] = true
+        classes["prop_door_rotating"] = true
+        classes["func_door_rotating"] = true
+        classes["func_door"] = true
+
+        function ENTITY:IsDoor()
+            return classes[ self:GetClass() ] or false
+        end
+
+    end
+
+    -- Entity:IsButton()
+    if SERVER then
+
+        local classes = list.GetForEdit( "Button Classes" )
+        classes["momentary_rot_button"] = true
+        classes["func_rot_button"] = true
+        classes["func_button"] = true
+        classes["gmod_button"] = true
+
+        function ENTITY:IsButton()
+            return classes[ self:GetClass() ] or false
+        end
+
     end
 
 end
@@ -425,6 +446,35 @@ end
 
 -- Only server features
 if SERVER then
+
+    -- util.Explosion( pos, radius, damage )
+    do
+
+        local EffectData = EffectData
+        local DamageInfo = DamageInfo
+        local up = Vector( 0, 0, 1 )
+
+        function util.Explosion( pos, radius, damage )
+            local dmg = DamageInfo()
+
+            dmg:SetDamage( type( damage ) == "number" and damage or 250 )
+            dmg:SetDamageType( DMG_BLAST )
+
+            local fx = EffectData()
+            fx:SetRadius( radius )
+            fx:SetOrigin( pos )
+            fx:SetNormal( up )
+
+            util.NextTick( function()
+                util.Effect( "Explosion", fx )
+                util.Effect( "HelicopterMegaBomb", fx )
+                util.BlastDamageInfo( dmg, pos, radius )
+            end )
+
+            return dmg, fx
+        end
+
+    end
 
     -- game.ChangeMap( `string` map )
     function game.ChangeLevel( mapName )
