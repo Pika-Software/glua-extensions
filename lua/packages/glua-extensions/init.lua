@@ -9,6 +9,7 @@ local util = util
 local hook = hook
 
 -- Variables
+local packageName = gpm.Package:GetIdentifier()
 local getmetatable = getmetatable
 local ipairs = ipairs
 local pairs = pairs
@@ -496,11 +497,11 @@ if SERVER then
     -- GM:PlayerInitialized( ply )
     local queue = {}
 
-    hook.Add( "PlayerInitialSpawn", "gpm.glua_extensions", function( ply )
+    hook.Add( "PlayerInitialSpawn", packageName, function( ply )
         queue[ ply ] = true
     end )
 
-    hook.Add( "SetupMove", "gpm.glua_extensions", function( ply, _, cmd )
+    hook.Add( "SetupMove", packageName, function( ply, _, cmd )
         if queue[ ply ] and not cmd:IsForced() then
             ply:SetNW2Bool( "m_pInitialized", true )
             queue[ ply ] = nil
@@ -529,7 +530,7 @@ if CLIENT then
     end )
 
     -- GM:PlayerInitialized( ply )
-    hook.Add( "InitPostEntity", "gpm.glua_extensions", function()
+    hook.Add( "InitPostEntity", packageName, function()
         hook.Run( "PlayerInitialized", LocalPlayer() )
     end )
 
@@ -558,7 +559,7 @@ if CLIENT then
             return width, height
         end
 
-        hook.Add( "OnScreenSizeChanged", "gpm.glua_extensions", function(  oldWidth, oldHeight )
+        hook.Add( "OnScreenSizeChanged", packageName, function(  oldWidth, oldHeight )
             screenWidth, screenHeight = ScrW(), ScrH()
             hook.Run( "ScreenResolutionChanged", width, height, oldWidth, oldHeight )
         end )
@@ -571,7 +572,7 @@ if CLIENT then
         local gui_IsGameUIVisible = gui.IsGameUIVisible
         local status = gui_IsGameUIVisible()
 
-        hook.Add( "Think", "gpm.glua_extensions", function()
+        hook.Add( "Think", packageName, function()
             local current = gui_IsGameUIVisible()
             if status == current then return end
             status = current
@@ -587,7 +588,7 @@ if CLIENT then
         local system_HasFocus = system.HasFocus
         local focus = system_HasFocus()
 
-        hook.Add( "Think", "gpm.glua_extensions", function()
+        hook.Add( "Think", packageName, function()
             local current = system_HasFocus()
             if focus == current then return end
             focus = current
@@ -598,8 +599,8 @@ if CLIENT then
     end
 
     -- GM:PlayerDisconnected( ply )
-    hook.Add( "ShutDown", "gpm.glua_extensions", function()
-        hook.Remove( "ShutDown", "gpm.glua_extensions" )
+    hook.Add( "ShutDown", packageName, function()
+        hook.Remove( "ShutDown", packageName )
         hook.Run( "PlayerDisconnected", LocalPlayer() )
     end )
 
@@ -680,7 +681,7 @@ end
 -- GM:LanguageChanged( languageCode, oldLanguageCode )
 cvars.AddChangeCallback( "gmod_language", function( _, old, new )
     hook.Run( "LanguageChanged", new, old )
-end, "gpm.glua_extensions" )
+end, packageName )
 
 local http = http
 

@@ -1,0 +1,7 @@
+{
+    "name": "glua-extensions",
+    "files": {
+        "lua/packages/glua-extensions/package.lua": "",
+        "lua/packages/glua-extensions/init.lua": ""
+    }
+}
