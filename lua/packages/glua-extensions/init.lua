@@ -438,6 +438,26 @@ do
 
     end
 
+    -- Player:GetTeamColor()
+    do
+
+        local team_GetColor = team.GetColor
+
+        function PLAYER:GetTeamColor()
+            return team_GetColor( self:Team() )
+        end
+
+    end
+
+    -- Player:GetHullCurrent()
+    function PLAYER:GetHullCurrent()
+        if self:Crouching() then
+            return self:GetHullDuck()
+        end
+
+        return self:GetHull()
+    end
+
     -- Player:IsFullyConnected()
     function PLAYER:IsFullyConnected()
         return self:GetNW2Bool( "m_pInitialized", false )
