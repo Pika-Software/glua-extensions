@@ -115,16 +115,6 @@ function table.Sub( tbl, offset, len )
     return newTbl
 end
 
--- table.Lookup( tbl, path, default )
-function table.Lookup( tbl, path, default )
-    for _, key in ipairs( string.Split( path, "." ) ) do
-        tbl = tbl[ key ]
-        if not tbl then return default end
-    end
-
-    return tbl
-end
-
 -- util.GetUUID()
 function util.GetUUID()
     return string.gsub( "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx", "[xy]", function( c )
