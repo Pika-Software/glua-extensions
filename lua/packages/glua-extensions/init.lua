@@ -115,11 +115,26 @@ function table.Sub( tbl, offset, len )
     return newTbl
 end
 
--- util.GetUUID()
-function util.GetUUID()
-    return string.gsub( "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx", "[xy]", function( c )
-        return string.format( "%x", ( c == "x" ) and math.random( 0, 0xf ) or math.random( 8, 0xb ) )
-    end )
+-- util.RandomUUID()
+-- https://gitlab.com/DBotThePony/DLib/-/blob/develop/lua_src/dlib/util/util.lua#L598
+function util.RandomUUID()
+    return string.format( "%.8x-%.4x-%.4x-%.4x-%.8x%.4x",
+        math.random( 0, 0xFFFFFFFF ), -- 32
+        math.random( 0, 0xFFFF ), -- 48
+        math.random( 0, 0xFFFF ), -- 64
+        math.random( 0, 0xFFFF ), -- 80
+        math.random( 0, 0xFFFFFFFF ), -- 112
+        math.random( 0, 0xFFFF ) -- 128
+    )
+end
+
+-- util.GetSteamVanityURL( str )
+function util.GetSteamVanityURL( str )
+    if string.IsSteamID( str ) then
+        return "https://steamcommunity.com/profiles/" .. util.SteamIDTo64( sid ) .. "/"
+    end
+
+    return "https://steamcommunity.com/profiles/" .. str .. "/"
 end
 
 -- file.ReadLine( filePath, len, gamePath )
@@ -335,6 +350,22 @@ function string.GetCharCount( str, char )
     end
 
     return counter
+end
+
+-- string.IsSteamID( str )
+function string.IsSteamID( str )
+    if not str then return false end
+    return string.match( str, "^STEAM_%d:%d:%d+$" ) ~= nil
+end
+
+-- string.IsSteamID64( str )
+function string.IsSteamID64( str )
+    return #str == 17 and string.sub( str, 1, 4 ) == "7656"
+end
+
+-- string.Capitalize( str )
+function string.Capitalize( str )
+    return string.upper( string.sub( str, 1, 1 ) ) .. string.sub( str, 2, #str )
 end
 
 do
