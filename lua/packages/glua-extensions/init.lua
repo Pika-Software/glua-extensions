@@ -303,19 +303,17 @@ end
 
 do
 
-    local util_TableToJSON = util.TableToJSON
-    local util_Compress = util.Compress
+    local spon = import( "https://raw.githubusercontent.com/thelastpenguin/sPON/master/lua/includes/modules/spon.lua" )
     local net = net
 
     -- net.ReadCompressTable()
     function net.ReadCompressTable( lenght )
-        local len = net.ReadUInt( lenght or 16 )
-        return util_JSONToTable( util_Decompress( net.ReadData( len ) ) )
+        return spon.decode( util.Decompress( net.ReadData( net.ReadUInt( lenght or 16 ) ) ) )
     end
 
     -- net.WriteCompressTable( tbl )
     function net.WriteCompressTable( tbl, lenght )
-        local data = util_Compress( util_TableToJSON( tbl ) )
+        local data = util.Compress( spon.encode( tbl ) )
         net.WriteUInt( #data, lenght or 16 )
         net.WriteData( data, #data )
     end

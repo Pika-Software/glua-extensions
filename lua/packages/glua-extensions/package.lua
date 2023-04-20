@@ -1,4 +1,4 @@
 name = "glua-extensions"
 main = "init.lua"
 logger = false
-version = 000201
+version = 000300
