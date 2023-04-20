@@ -417,7 +417,7 @@ do
         classes["prop_static"] = true
 
         function ENTITY:IsProp()
-            return classes[ self:GetClass() ] or false
+            return classes[ ENTITY.GetClass( self ) ] or false
         end
 
     end
@@ -432,7 +432,7 @@ do
         classes["func_door"] = true
 
         function ENTITY:IsDoor()
-            return classes[ self:GetClass() ] or false
+            return classes[ ENTITY.GetClass( self ) ] or false
         end
 
     end
@@ -447,9 +447,137 @@ do
         classes["gmod_button"] = true
 
         function ENTITY:IsButton()
-            return classes[ self:GetClass() ] or false
+            return classes[ ENTITY.GetClass( self ) ] or false
         end
 
+    end
+
+    -- Entity:FindBone( pattern )
+    do
+
+        local cache = {}
+
+        function ENTITY:FindBone( pattern )
+            local model = ENTITY.GetModel( self )
+            local modelCache = cache[ model ]
+            if not modelCache then
+                modelCache = {}; cache[ model ] = modelCache
+            end
+
+            local result = modelCache[ pattern ]
+            if result then return result end
+
+            for index = 0, ENTITY.GetBoneCount( self ) do
+                local boneName = ENTITY.GetBoneName( self, index )
+                if not boneName then continue end
+                if boneName == "__INVALIDBONE__" then continue end
+
+                if not string.match( boneName, pattern ) then continue end
+                modelCache[ pattern ] = index
+                return index
+            end
+
+            modelCache[ pattern ] = -1
+            return -1
+        end
+
+    end
+
+    -- Entity:GetAbsoluteBonePosition( bone )
+    function ENTITY:GetAbsoluteBonePosition( bone )
+        local pos, ang = ENTITY.GetBonePosition( self, bone )
+        if pos == ENTITY.GetPos( self ) then
+            local matrix = ENTITY.GetBoneMatrix( self, bone )
+            if type( matrix ) == "VMatrix" then
+                pos, ang = matrix:GetTranslation(), matrix:GetAngles()
+            end
+        end
+
+        return pos, ang
+    end
+
+    -- Entity:GetLocalBonePosition( bone )
+    do
+
+        local WorldToLocal = WorldToLocal
+
+        function ENTITY:GetLocalBonePosition( bone )
+            local pos, ang = ENTITY.GetAbsoluteBonePosition( self, bone )
+            return WorldToLocal( pos, ang, ENTITY.GetPos( self ), ENTITY.GetAngles( self ) )
+        end
+
+    end
+
+    -- Entity:GetAbsoluteBonePositionByName( pattern )
+    function ENTITY:GetAbsoluteBonePositionByName( pattern )
+        local bone = ENTITY.FindBone( self, pattern )
+        if not bone or bone < 0 then return end
+        return ENTITY.GetAbsoluteBonePosition( self, bone )
+    end
+
+    -- Entity:GetLocalBonePositionByName( pattern )
+    function ENTITY:GetLocalBonePositionByName( pattern )
+        local bone = ENTITY.FindBone( self, pattern )
+        if not bone or bone < 0 then return end
+        return ENTITY.GetLocalBonePosition( self, bone )
+    end
+
+    -- Entity:FindAttachment( pattern )
+    do
+
+        local cache = {}
+
+        function ENTITY:FindAttachment( pattern )
+            local model = ENTITY.GetModel( self )
+            local modelCache = cache[ model ]
+            if not modelCache then
+                modelCache = {}; cache[ model ] = modelCache
+            end
+
+            local result = modelCache[ pattern ]
+            if result then return result end
+
+            for _, data in ipairs( ENTITY.GetAttachments( self ) ) do
+                if not string.match( data.name, pattern ) then continue end
+                modelCache[ pattern ] = data.id
+                return data.id
+            end
+
+            modelCache[ pattern ] = -1
+            return -1
+        end
+
+    end
+
+    -- Entity:GetAttachmentByName( pattern )
+    function ENTITY:GetAttachmentByName( pattern )
+        local index = ENTITY.FindAttachment( self, pattern )
+        if not index or index <= 0 then return end
+
+        local attachmet = ENTITY.GetAttachment( self, index )
+        if attachmet then return attachmet end
+    end
+
+    -- Entity:GetHitBox( bone )
+    function ENTITY:GetHitBox( bone )
+        for hboxset = 0, ENTITY.GetHitboxSetCount( self ) - 1 do
+            for hitbox = 0, ENTITY.GetHitBoxCount( self, hboxset ) - 1 do
+                if ENTITY.GetHitBoxBone( self, hitbox, hboxset ) ~= bone then continue end
+                return hitbox, hboxset
+            end
+        end
+    end
+
+    -- Entity:GetHitBoxBoundsByBone( bone )
+    function ENTITY:GetHitBoxBoundsByBone( bone )
+        return ENTITY.GetHitBoxBounds( self, ENTITY.GetHitBox( self, bone ) )
+    end
+
+    -- Entity:GetHitBoxBoundsByBoneName( pattern )
+    function ENTITY:GetHitBoxBoundsByBoneName( pattern )
+        local bone = ENTITY.FindBone( self, pattern )
+        if not bone or bone < 0 then return end
+        return ENTITY.GetHitBoxBoundsByBone( self, bone )
     end
 
 end
