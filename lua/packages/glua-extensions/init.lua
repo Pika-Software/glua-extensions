@@ -115,6 +115,74 @@ function table.Sub( tbl, offset, len )
     return newTbl
 end
 
+-- table.Filter( tbl, callback )
+function table.Filter( tbl, callback )
+    local i, e, c = 0, #tbl, 1
+    if e == 0 then goto abort end
+
+    ::startfilter::
+
+    i = i + 1
+    if callback( tbl[i] ) then tbl[ c ] = tbl[ i ]; c = c + 1 end
+    if i < e then goto startfilter end
+
+    i = c - 1
+    ::startprune::
+
+    i = i + 1
+    tbl[i] = nil
+    if i < e then goto startprune end
+
+    ::abort::
+
+    return tbl
+end
+
+-- table.FilterCopy( tbl, callback )
+function table.FilterCopy( tbl, callback )
+    local result = {}
+
+    local i, e, c = 0, #tbl, 1
+    if e == 0 then goto abort end
+
+    ::startfilter::
+
+    i = i + 1
+    if callback( tbl[ i ] ) then result[ c ] = tbl[ i ]; c = c + 1 end
+    if i < e then goto startfilter end
+
+    ::abort::
+
+    return result
+end
+
+-- table.ConcatKeys( tbl, concatenator )
+function table.ConcatKeys( tbl, concatenator )
+    concatenator = concatenator or ''
+
+    local str = ''
+    for key in pairs( tbl ) do
+        str = ( str ~= '' and concatenator or str ) .. key
+    end
+
+    return str
+end
+
+-- table.MultiRemove( tbl, index, length )
+function table.MultiRemove( tbl, index, length )
+    if not length then
+        length = index
+        index = 1
+    end
+
+    local result = {}
+    for i = 1, length do
+        result[ i ] = table.remove( tbl, index )
+    end
+
+    return result
+end
+
 -- util.RandomUUID()
 -- https://gitlab.com/DBotThePony/DLib/-/blob/develop/lua_src/dlib/util/util.lua#L598
 function util.RandomUUID()
@@ -231,43 +299,6 @@ function game.GetAmmoList()
     end
 
     return result
-end
-
--- player.Random( noBots )
-do
-
-    local player = player
-
-    function player.Random( noBots )
-        local players = noBots and player.GetHumans() or player.GetAll()
-        return players[ math.random( 1, #players ) ]
-    end
-
-    -- player.GetListenServerHost()
-    if game.SinglePlayer() then
-
-        local Entity = Entity
-
-        function player.GetListenServerHost()
-            return Entity( 1 )
-        end
-
-    else
-
-        if game.IsDedicated() then
-            player.GetListenServerHost = debug.fempty
-        else
-
-            function player.GetListenServerHost()
-                for _, ply in ipairs( player.GetHumans() ) do
-                    if ply:IsListenServerHost() then return ply end
-                end
-            end
-
-        end
-
-    end
-
 end
 
 do
@@ -426,6 +457,60 @@ end
 do
 
     local PLAYER = FindMetaTable( "Player" )
+
+    do
+
+        local player = player
+
+        -- player.GetStaff()
+        function player.GetStaff()
+            return table.Filter( player.GetAll(), PLAYER.IsAdmin )
+        end
+
+        -- player.Find( str )
+        function player.Find( str )
+            local result = {}
+            for _, ply in ipairs( player.GetAll() ) do
+                if string.find( ply:Nick(), str ) ~= nil then
+                    result[ #result + 1 ] = ply
+                end
+            end
+
+            return result
+        end
+
+        -- player.Random( noBots )
+        function player.Random( noBots )
+            local players = noBots and player.GetHumans() or player.GetAll()
+            return players[ math.random( 1, #players ) ]
+        end
+
+        -- player.GetListenServerHost()
+        if game.SinglePlayer() then
+
+            local Entity = Entity
+
+            function player.GetListenServerHost()
+                return Entity( 1 )
+            end
+
+        else
+
+            if game.IsDedicated() then
+                player.GetListenServerHost = debug.fempty
+            else
+
+                function player.GetListenServerHost()
+                    for _, ply in ipairs( player.GetHumans() ) do
+                        if ply:IsListenServerHost() then return ply end
+                    end
+                end
+
+            end
+
+        end
+
+    end
 
     -- Player:ConCommand( command )
     if SERVER then
