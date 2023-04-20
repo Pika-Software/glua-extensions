@@ -465,20 +465,29 @@ do
             end
 
             local result = modelCache[ pattern ]
-            if result then return result end
+            if result ~= nil then
+                if result == false then return end
+                return result
+            end
 
-            for index = 0, ENTITY.GetBoneCount( self ) do
+            local invalid, count = 0, ENTITY.GetBoneCount( self )
+            for index = 0, count do
                 local boneName = ENTITY.GetBoneName( self, index )
                 if not boneName then continue end
-                if boneName == "__INVALIDBONE__" then continue end
 
-                if not string.match( boneName, pattern ) then continue end
+                if boneName == "__INVALIDBONE__" then
+                    invalid = invalid + 1
+                    continue
+                end
+
+                if not string.find( boneName, pattern ) then continue end
+
                 modelCache[ pattern ] = index
                 return index
             end
 
-            modelCache[ pattern ] = -1
-            return -1
+            if invalid >= count then return end
+            modelCache[ pattern ] = false
         end
 
     end
@@ -535,16 +544,18 @@ do
             end
 
             local result = modelCache[ pattern ]
-            if result then return result end
+            if result ~= nil then
+                if result == false then return end
+                return result
+            end
 
             for _, data in ipairs( ENTITY.GetAttachments( self ) ) do
-                if not string.match( data.name, pattern ) then continue end
+                if not string.find( data.name, pattern ) then continue end
                 modelCache[ pattern ] = data.id
                 return data.id
             end
 
-            modelCache[ pattern ] = -1
-            return -1
+            modelCache[ pattern ] = false
         end
 
     end
