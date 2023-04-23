@@ -318,6 +318,27 @@ do
         net.WriteData( data, #data )
     end
 
+    -- net.Remove( name )
+    function net.Remove( name )
+        net.Receivers[ name ] = nil
+    end
+
+end
+
+do
+
+    local properties = properties
+
+    -- properties.GetAll()
+    function properties.GetAll()
+        return properties.List
+    end
+
+    -- properties.Remove( name )
+    function properties.Remove( name )
+        properties.List[ string.lower( name ) ] = nil
+    end
+
 end
 
 -- IMaterial improvements
@@ -799,6 +820,28 @@ if CLIENT then
 
     -- ents.Create aliase for client
     ents.Create = ents.CreateClientside
+
+    -- spawnmenu.RemoveCreationTab( name )
+    do
+
+        local tabs = spawnmenu.GetCreationTabs()
+
+        function spawnmenu.RemoveCreationTab( name )
+            tabs[ name ] = nil
+        end
+
+    end
+
+    -- vgui.Exists( className )
+    do
+
+        local vgui = vgui
+
+        function vgui.Exists( className )
+            return vgui.GetControlTable( className ) ~= nil
+        end
+
+    end
 
     -- render.GetLightLevel( origin )
     do
