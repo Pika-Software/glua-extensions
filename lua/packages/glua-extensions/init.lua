@@ -205,30 +205,19 @@ function util.GetSteamVanityURL( str )
     return "https://steamcommunity.com/profiles/" .. str .. "/"
 end
 
--- file.ReadLine( filePath, len, gamePath )
-function file.ReadLine( filePath, len, gamePath )
-    local f = file.Open( filePath, "rb", gamePath or "GAME" )
-    if not f then return "" end
-
-    local str = f:Read( len )
-    f:Close()
-
-    return str
-end
-
 -- file.IsBSP( filePath, gamePath )
 function file.IsBSP( filePath, gamePath )
-    return file.ReadLine( filePath, 4, gamePath ) == "VBSP"
+    return file.Read( filePath, gamePath, 4 ) == "VBSP"
 end
 
 -- file.IsGMA( filePath, gamePath )
 function file.IsGMA( filePath, gamePath )
-    return file.ReadLine( filePath, 4, gamePath ) == "GMAD"
+    return file.Read( filePath, gamePath, 4 ) == "GMAD"
 end
 
 -- file.IsVTF( filePath, gamePath )
 function file.IsVTF( filePath, gamePath )
-    return file.ReadLine( filePath, 3, gamePath ) == "VTF"
+    return file.Read( filePath, gamePath, 3 ) == "VTF"
 end
 
 -- file.FindAll( filePath, gamePath )
