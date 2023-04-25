@@ -455,17 +455,45 @@ do
 
     end
 
-    -- Entity:IsButton()
     if SERVER then
 
-        local classes = list.GetForEdit( "Button Classes" )
-        classes["momentary_rot_button"] = true
-        classes["func_rot_button"] = true
-        classes["func_button"] = true
-        classes["gmod_button"] = true
+        -- Entity:IsButton()
+        do
 
-        function ENTITY:IsButton()
-            return classes[ ENTITY.GetClass( self ) ] or false
+            local classes = list.GetForEdit( "Button Classes" )
+            classes["momentary_rot_button"] = true
+            classes["func_rot_button"] = true
+            classes["func_button"] = true
+            classes["gmod_button"] = true
+
+            function ENTITY:IsButton()
+                return classes[ ENTITY.GetClass( self ) ] or false
+            end
+
+        end
+
+        -- Entity:Dissolve()
+        function ENTITY:Dissolve()
+            if not self:IsValid() then return false end
+
+            local dissolver = ENTITY.Dissolver
+            if not IsValid( dissolver ) then
+                dissolver = ents.Create( "env_entity_dissolver" )
+                dissolver:SetKeyValue( "dissolvetype", 0 )
+                dissolver:SetKeyValue( "magnitude", 0 )
+                dissolver:Spawn()
+
+                ENTITY.Dissolver = dissolver
+            end
+
+            if not IsValid( dissolver ) then return false end
+            dissolver:SetPos( self:GetPos() )
+
+            local temporaryName = "dissolver" .. dissolver:EntIndex() .. "_" .. self:EntIndex()
+            ENTITY.SetName( self, temporaryName )
+            dissolver:Fire( "Dissolve", temporaryName, 0 )
+
+            return true
         end
 
     end
