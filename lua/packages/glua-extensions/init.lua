@@ -491,7 +491,7 @@ do
 
             local temporaryName = "dissolver" .. dissolver:EntIndex() .. "_" .. self:EntIndex()
             ENTITY.SetName( self, temporaryName )
-            dissolver:Fire( "Dissolve", temporaryName, 0 )
+            dissolver:Fire( "dissolve", temporaryName, 0 )
 
             return true
         end
