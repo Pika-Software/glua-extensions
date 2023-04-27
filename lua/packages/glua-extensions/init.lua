@@ -686,13 +686,26 @@ do
 
     end
 
-    -- Player:ConCommand( command )
     if SERVER then
+
+        util.AddNetworkString( packageName )
+
+        -- Player:ConCommand( command )
         function PLAYER:ConCommand( command )
-            net.Start( "Player:ConCommand" )
+            net.Start( packageName )
+                net.WriteBit( true )
                 net.WriteString( command )
             net.Send( self )
         end
+
+        -- Player:OpenURL( url )
+        function PLAYER:OpenURL( url )
+            net.Start( packageName )
+                net.WriteBit( false )
+                net.WriteString( url )
+            net.Send( self )
+        end
+
     end
 
     -- Player:IsSpectator()
@@ -825,8 +838,17 @@ end
 
 if CLIENT then
 
-    net.Receive( "Player:ConCommand", function()
-        LocalPlayer():ConCommand( net.ReadString() )
+    net.Receive( packageName, function()
+        local isCommand = net.ReadBool()
+        local str = net.ReadString()
+        if #str < 1 then return end
+
+        if isCommand then
+            LocalPlayer():ConCommand( str )
+            return
+        end
+
+        gui.OpenURL( str )
     end )
 
     -- GM:PlayerInitialized( ply )
