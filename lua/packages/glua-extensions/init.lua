@@ -626,6 +626,31 @@ do
         return ENTITY.GetHitBoxBoundsByBone( self, bone )
     end
 
+    -- Entity:GetViewAngle( pos )
+    function ENTITY:GetViewAngle( pos )
+        return util.GetViewAngle( self:EyePos(), self:EyeAngles(), pos )
+    end
+
+    -- Entity:IsInFOV( pos, fov )
+    function ENTITY:IsInFOV( pos, fov )
+        return util.IsInFOV( self:EyePos(), self:EyeAngles(), pos, fov )
+    end
+
+    -- Entity:IsInTrace( pos )
+    function ENTITY:IsInTrace( pos )
+        return util.IsInTrace( pos, self:EyePos(), self )
+    end
+
+    -- Entity:IsScreenVisible( pos, limit, fov )
+    local defaultLimit = 512 ^ 2
+    function ENTITY:IsScreenVisible( pos, limit, fov )
+        if not fov and self:IsPlayer() or self:IsNextBot() then
+            fov = self:GetFOV()
+        end
+
+        return self:EyePos():DistToSqr( pos ) <= ( limit or defaultLimit ) and self:IsLineOfSightClear( pos ) and self:IsInFOV( pos, fov )
+    end
+
 end
 
 do
