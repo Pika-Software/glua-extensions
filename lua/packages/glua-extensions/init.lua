@@ -205,6 +205,28 @@ function util.GetSteamVanityURL( str )
     return "https://steamcommunity.com/profiles/" .. str .. "/"
 end
 
+-- util.GetViewAngle( pos, ang, pos2 )
+function util.GetViewAngle( pos, ang, pos2 )
+    local diff = pos2 - pos
+    diff:Normalize()
+
+    return math.abs( math.deg( math.acos( ang:Forward():Dot( diff ) ) ) )
+end
+
+-- util.IsInFOV( pos, ang, pos2, fov )
+function util.IsInFOV( pos, ang, pos2, fov )
+    return util.GetViewAngle( pos, ang, pos2 ) <= ( fov or 90 )
+end
+
+-- util.IsInTrace( start, endpos, filter )
+function util.IsInTrace( start, endpos, filter )
+    return util.TraceLine( {
+        ["start"] = start,
+        ["endpos"] = endpos,
+        ["filter"] = filter
+    } ).Fraction == 1
+end
+
 -- file.IsBSP( filePath, gamePath )
 function file.IsBSP( filePath, gamePath )
     return file.Read( filePath, gamePath, 4 ) == "VBSP"
