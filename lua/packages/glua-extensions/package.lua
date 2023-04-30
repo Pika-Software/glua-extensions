@@ -1,3 +1,3 @@
 name = "glua-extensions"
 main = "init.lua"
-version = 000800
+version = 000900

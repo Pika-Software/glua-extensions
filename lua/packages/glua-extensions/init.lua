@@ -294,15 +294,15 @@ do
 
     local net = net
 
-    -- net.ReadCompressTable()
-    function net.ReadCompressTable( lenght )
-        return util.JSONToTable( util.Decompress( net.ReadData( net.ReadUInt( lenght or 16 ) ) ) )
+    -- net.ReadCompressTable( bitsCount )
+    function net.ReadCompressTable( bitsCount )
+        return util.JSONToTable( util.Decompress( net.ReadData( net.ReadUInt( bitsCount or 16 ) ) ) )
     end
 
-    -- net.WriteCompressTable( tbl )
-    function net.WriteCompressTable( tbl, lenght )
+    -- net.WriteCompressTable( tbl, bitsCount )
+    function net.WriteCompressTable( tbl, bitsCount )
         local data = util.Compress( util.TableToJSON( tbl ) )
-        net.WriteUInt( #data, lenght or 16 )
+        net.WriteUInt( #data, bitsCount or 16 )
         net.WriteData( data, #data )
     end
 
