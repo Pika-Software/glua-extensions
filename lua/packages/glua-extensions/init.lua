@@ -218,13 +218,26 @@ function util.IsInFOV( pos, ang, pos2, fov )
     return util.GetViewAngle( pos, ang, pos2 ) <= ( fov or 90 )
 end
 
--- util.IsInTrace( start, endpos, filter )
-function util.IsInTrace( start, endpos, filter )
-    return util.TraceLine( {
-        ["start"] = start,
-        ["endpos"] = endpos,
-        ["filter"] = filter
-    } ).Fraction == 1
+-- util.TracePenetration( traceData, onPenetration, remainingTraces )
+function util.TracePenetration( traceData, onPenetration, remainingTraces )
+    if not remainingTraces then
+        remainingTraces = 100
+    end
+
+    local traceResult = util.TraceLine( traceData )
+    traceData.start = traceResult.HitPos + traceResult.Normal
+    remainingTraces = remainingTraces - 1
+
+    local result = onPenetration( traceResult )
+    if type( result ) == "table" then
+        table.Merge( traceData, result )
+    end
+
+    if result ~= false and remainingTraces > 0 and traceResult.HitPos:Distance( traceData.endpos ) > 1 then
+        return util.TracePenetration( traceData, onPenetration, remainingTraces )
+    end
+
+    return traceResult
 end
 
 -- file.IsBSP( filePath, gamePath )
@@ -656,11 +669,6 @@ do
     -- Entity:IsInFOV( pos, fov )
     function ENTITY:IsInFOV( pos, fov )
         return util.IsInFOV( self:EyePos(), self:EyeAngles(), pos, fov )
-    end
-
-    -- Entity:IsInTrace( pos )
-    function ENTITY:IsInTrace( pos )
-        return util.IsInTrace( pos, self:EyePos(), self )
     end
 
     -- Entity:IsScreenVisible( pos, limit, fov )
