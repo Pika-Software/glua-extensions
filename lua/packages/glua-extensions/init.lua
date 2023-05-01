@@ -448,7 +448,7 @@ do
     -- Entity:IsProp()
     do
 
-        local classes = list.GetForEdit( "Prop Classes" )
+        local classes = list.GetForEdit( "prop-classes" )
         classes["prop_physics_multiplayer"] = true
         classes["prop_physics_override"] = true
         classes["prop_dynamic_override"] = true
@@ -467,7 +467,7 @@ do
     -- Entity:IsDoor()
     do
 
-        local classes = list.GetForEdit( "Door Classes" )
+        local classes = list.GetForEdit( "door-classes" )
         classes["prop_testchamber_door"] = true
         classes["prop_door_rotating"] = true
         classes["func_door_rotating"] = true
@@ -479,22 +479,37 @@ do
 
     end
 
-    if SERVER then
+    -- Entity:IsButton()
+    do
 
-        -- Entity:IsButton()
-        do
+        local classes = list.GetForEdit( "button-classes" )
+        classes["momentary_rot_button"] = true
+        classes["func_rot_button"] = true
+        classes["func_button"] = true
+        classes["gmod_button"] = true
 
-            local classes = list.GetForEdit( "Button Classes" )
-            classes["momentary_rot_button"] = true
-            classes["func_rot_button"] = true
-            classes["func_button"] = true
-            classes["gmod_button"] = true
-
-            function ENTITY:IsButton()
-                return classes[ ENTITY.GetClass( self ) ] or false
-            end
-
+        function ENTITY:IsButton()
+            return classes[ ENTITY.GetClass( self ) ] or false
         end
+
+    end
+
+    -- Entity:IsWindow()
+    do
+
+        local classes = list.GetForEdit( "window-classes" )
+
+        classes["func_breakable_surf"] = true
+        classes["func_breakable"] = true
+        classes["func_physbox"] = true
+
+        function ENTITY:IsWindow()
+            return classes[ ENTITY.GetClass( self ) ] or false
+        end
+
+    end
+
+    if SERVER then
 
         -- Entity:Dissolve()
         function ENTITY:Dissolve()
