@@ -436,7 +436,6 @@ do
 
     local ENTITY = FindMetaTable( "Entity" )
 
-    -- Entity:IsProp()
     do
 
         local classes = list.GetForEdit( "prop-classes" )
@@ -449,17 +448,18 @@ do
         classes["prop_detail"] = true
         classes["prop_static"] = true
 
-        function util.IsProp( className )
+        -- util.IsPropClass( className )
+        function util.IsPropClass( className )
             return classes[ className ] or false
         end
 
+        -- Entity:IsProp()
         function ENTITY:IsProp()
-            return util.IsProp( ENTITY.GetClass( self ) )
+            return util.IsPropClass( ENTITY.GetClass( self ) )
         end
 
     end
 
-    -- Entity:IsDoor()
     do
 
         local classes = list.GetForEdit( "door-classes" )
@@ -468,17 +468,18 @@ do
         classes["func_door_rotating"] = true
         classes["func_door"] = true
 
-        function util.IsDoor( className )
+        -- util.IsDoorClass( className )
+        function util.IsDoorClass( className )
             return classes[ className ] or false
         end
 
+        -- Entity:IsDoor()
         function ENTITY:IsDoor()
-            return util.IsDoor( ENTITY.GetClass( self ) )
+            return util.IsDoorClass( ENTITY.GetClass( self ) )
         end
 
     end
 
-    -- Entity:IsButton()
     do
 
         local classes = list.GetForEdit( "button-classes" )
@@ -487,17 +488,18 @@ do
         classes["func_button"] = true
         classes["gmod_button"] = true
 
-        function util.IsButton( className )
+        -- util.IsButtonClass( className )
+        function util.IsButtonClass( className )
             return classes[ className ] or false
         end
 
+        -- Entity:IsButton()
         function ENTITY:IsButton()
-            return util.IsButton( ENTITY.GetClass( self ) )
+            return util.IsButtonClass( ENTITY.GetClass( self ) )
         end
 
     end
 
-    -- Entity:IsWindow()
     do
 
         local classes = list.GetForEdit( "window-classes" )
@@ -506,17 +508,39 @@ do
         classes["func_breakable"] = true
         classes["func_physbox"] = true
 
-        function util.IsWindow( className )
+        -- util.IsWindowClass( className )
+        function util.IsWindowClass( className )
             return classes[ className ] or false
         end
 
+        -- Entity:IsWindow()
         function ENTITY:IsWindow()
-            return util.IsWindow( ENTITY.GetClass( self ) )
+            return util.IsWindowClass( ENTITY.GetClass( self ) )
         end
 
     end
 
-    -- Entity:IsSpawnPoint()
+    do
+
+        local classes = list.GetForEdit( "info-node-classes" )
+
+        classes["info_hint"] = true
+        classes["info_node_hint"] = true
+        classes["info_node_air_hint"] = true
+        classes["info_node_climb"] = true
+
+        -- util.IsInfoNodeClass( className )
+        function util.IsInfoNodeClass( className )
+            return classes[ className ] or false
+        end
+
+        -- Entity:IsInfoNode()
+        function ENTITY:IsInfoNode()
+            return util.IsInfoNodeClass( ENTITY.GetClass( self ) )
+        end
+
+    end
+
     do
 
         local classes = list.GetForEdit( "player-spawns" )
@@ -584,12 +608,14 @@ do
         classes["info_survivor_rescue"] = true
         -- classes["info_survivor_position"] = true
 
-        function util.IsSpawnPoint( className )
+        -- util.IsSpawnPointClass( className )
+        function util.IsSpawnPointClass( className )
             return classes[ className ] or false
         end
 
+        -- Entity:IsSpawnPoint()
         function ENTITY:IsSpawnPoint()
-            return util.IsSpawnPoint( ENTITY.GetClass( self ) )
+            return util.IsSpawnPointClass( ENTITY.GetClass( self ) )
         end
 
     end
