@@ -9,8 +9,8 @@ local util = util
 local hook = hook
 
 -- Variables
-local packageName = gpm.Package:GetIdentifier()
 local getmetatable = getmetatable
+local gPackage = gpm.Package
 local ipairs = ipairs
 local pairs = pairs
 local type = type
@@ -871,11 +871,13 @@ do
 
     if SERVER then
 
-        util.AddNetworkString( packageName )
+        local networkString = gPackage:GetIdentifier( "player-actions" )
+
+        util.AddNetworkString( networkString )
 
         -- Player:ConCommand( command )
         function PLAYER:ConCommand( command )
-            net.Start( packageName )
+            net.Start( networkString )
                 net.WriteBit( true )
                 net.WriteString( command )
             net.Send( self )
@@ -883,7 +885,7 @@ do
 
         -- Player:OpenURL( url )
         function PLAYER:OpenURL( url )
-            net.Start( packageName )
+            net.Start( networkString )
                 net.WriteBit( false )
                 net.WriteString( url )
             net.Send( self )
@@ -998,11 +1000,11 @@ if SERVER then
     -- GM:PlayerInitialized( ply )
     local queue = {}
 
-    hook.Add( "PlayerInitialSpawn", packageName, function( ply )
+    hook.Add( "PlayerInitialSpawn", gPackage:GetIdentifier( "player-initialized" ), function( ply )
         queue[ ply ] = true
     end )
 
-    hook.Add( "SetupMove", packageName, function( ply, _, cmd )
+    hook.Add( "SetupMove", gPackage:GetIdentifier( "player-initialized" ), function( ply, _, cmd )
         if queue[ ply ] and not cmd:IsForced() then
             ply:SetNW2Bool( "m_pInitialized", true )
             queue[ ply ] = nil
@@ -1026,7 +1028,7 @@ end
 
 if CLIENT then
 
-    net.Receive( packageName, function()
+    net.Receive( gPackage:GetIdentifier( "player-actions" ), function()
         local isCommand = net.ReadBool()
         local str = net.ReadString()
         if #str < 1 then return end
@@ -1040,7 +1042,7 @@ if CLIENT then
     end )
 
     -- GM:PlayerInitialized( ply )
-    hook.Add( "InitPostEntity", packageName, function()
+    hook.Add( "InitPostEntity", gPackage:GetIdentifier( "player-initialized" ), function()
         hook.Run( "PlayerInitialized", LocalPlayer() )
     end )
 
@@ -1091,7 +1093,7 @@ if CLIENT then
             return width, height
         end
 
-        hook.Add( "OnScreenSizeChanged", packageName, function(  oldWidth, oldHeight )
+        hook.Add( "OnScreenSizeChanged", gPackage:GetIdentifier( "screen-resolution" ), function(  oldWidth, oldHeight )
             screenWidth, screenHeight = ScrW(), ScrH()
             hook.Run( "ScreenResolutionChanged", width, height, oldWidth, oldHeight )
         end )
@@ -1104,7 +1106,7 @@ if CLIENT then
         local gui_IsGameUIVisible = gui.IsGameUIVisible
         local status = gui_IsGameUIVisible()
 
-        hook.Add( "Think", packageName, function()
+        hook.Add( "Think", gPackage:GetIdentifier( "game-ui" ), function()
             local current = gui_IsGameUIVisible()
             if status == current then return end
             status = current
@@ -1120,7 +1122,7 @@ if CLIENT then
         local system_HasFocus = system.HasFocus
         local focus = system_HasFocus()
 
-        hook.Add( "Think", packageName, function()
+        hook.Add( "Think", gPackage:GetIdentifier( "focus" ), function()
             local current = system_HasFocus()
             if focus == current then return end
             focus = current
@@ -1131,10 +1133,16 @@ if CLIENT then
     end
 
     -- GM:PlayerDisconnected( ply )
-    hook.Add( "ShutDown", packageName, function()
-        hook.Remove( "ShutDown", packageName )
-        hook.Run( "PlayerDisconnected", LocalPlayer() )
-    end )
+    do
+
+        local hookName = gPackage:GetIdentifier( "player-disconnected" )
+
+        hook.Add( "ShutDown", hookName, function()
+            hook.Remove( "ShutDown", hookName )
+            hook.Run( "PlayerDisconnected", LocalPlayer() )
+        end )
+
+    end
 
     local language = language
 
@@ -1213,7 +1221,7 @@ end
 -- GM:LanguageChanged( languageCode, oldLanguageCode )
 cvars.AddChangeCallback( "gmod_language", function( _, old, new )
     hook.Run( "LanguageChanged", new, old )
-end, packageName )
+end, gPackage:GetIdentifier( "gmod-language" ) )
 
 local http = http
 
