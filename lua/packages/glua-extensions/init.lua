@@ -30,9 +30,6 @@ do
 
 end
 
--- C# math.Map = Lua math.Remap
-math.Map = math.Remap
-
 -- string.Hash( str )
 function string.Hash( str )
     local hash = 0
@@ -304,12 +301,6 @@ do
 
 end
 
--- game.GetWorldSize()
-function game.GetWorldSize()
-    local world = game.GetWorld()
-    return world:GetInternalVariable( "m_WorldMins" ), world:GetInternalVariable( "m_WorldMaxs" )
-end
-
 -- game.AmmoList
 function game.GetAmmoList()
     local last = game.GetAmmoName( 1 )
@@ -458,8 +449,12 @@ do
         classes["prop_detail"] = true
         classes["prop_static"] = true
 
+        function util.IsProp( className )
+            return classes[ className ] or false
+        end
+
         function ENTITY:IsProp()
-            return classes[ ENTITY.GetClass( self ) ] or false
+            return util.IsProp( ENTITY.GetClass( self ) )
         end
 
     end
@@ -473,8 +468,12 @@ do
         classes["func_door_rotating"] = true
         classes["func_door"] = true
 
+        function util.IsDoor( className )
+            return classes[ className ] or false
+        end
+
         function ENTITY:IsDoor()
-            return classes[ ENTITY.GetClass( self ) ] or false
+            return util.IsDoor( ENTITY.GetClass( self ) )
         end
 
     end
@@ -488,8 +487,12 @@ do
         classes["func_button"] = true
         classes["gmod_button"] = true
 
+        function util.IsButton( className )
+            return classes[ className ] or false
+        end
+
         function ENTITY:IsButton()
-            return classes[ ENTITY.GetClass( self ) ] or false
+            return util.IsButton( ENTITY.GetClass( self ) )
         end
 
     end
@@ -503,8 +506,90 @@ do
         classes["func_breakable"] = true
         classes["func_physbox"] = true
 
+        function util.IsWindow( className )
+            return classes[ className ] or false
+        end
+
         function ENTITY:IsWindow()
-            return classes[ ENTITY.GetClass( self ) ] or false
+            return util.IsWindow( ENTITY.GetClass( self ) )
+        end
+
+    end
+
+    -- Entity:IsSpawnPoint()
+    do
+
+        local classes = list.GetForEdit( "player-spawns" )
+
+        -- Garry's Mod
+        classes["info_player_start"] = true
+
+        -- Garry's Mod (old)
+        classes["gmod_player_start"] = true
+
+        -- Half-Life 2: Deathmatch
+        classes["info_player_deathmatch"] = true
+        classes["info_player_combine"] = true
+        classes["info_player_rebel"] = true
+
+        -- Counter-Strike: Source & Counter-Strike: Global Offensive
+        classes["info_player_counterterrorist"] = true
+        classes["info_player_terrorist"] = true
+
+        -- Day of Defeat: Source
+        classes["info_player_axis"] = true
+        classes["info_player_allies"] = true
+
+        -- Team Fortress 2
+        classes["info_player_teamspawn"] = true
+
+        -- Insurgency
+        classes["ins_spawnpoint"] = true
+
+        -- AOC
+        classes["aoc_spawnpoint"] = true
+
+        -- Dystopia
+        classes["dys_spawn_point"] = true
+
+        -- Pirates, Vikings, and Knights II
+        classes["info_player_pirate"] = true
+        classes["info_player_viking"] = true
+        classes["info_player_knight"] = true
+
+        -- D.I.P.R.I.P. Warm Up
+        classes["diprip_start_team_blue"] = true
+        classes["diprip_start_team_red"] = true
+
+        -- OB
+        classes["info_player_red"] = true
+        classes["info_player_blue"] = true
+
+        -- Synergy
+        classes["info_player_coop"] = true
+
+        -- Zombie Panic! Source
+        classes["info_player_human"] = true
+        classes["info_player_zombie"] = true
+
+        -- Zombie Master
+        classes["info_player_zombiemaster"] = true
+
+        -- Fistful of Frags
+        classes["info_player_fof"] = true
+        classes["info_player_desperado"] = true
+        classes["info_player_vigilante"] = true
+
+        -- Left 4 Dead & Left 4 Dead 2
+        classes["info_survivor_rescue"] = true
+        -- classes["info_survivor_position"] = true
+
+        function util.IsSpawnPoint( className )
+            return classes[ className ] or false
+        end
+
+        function ENTITY:IsSpawnPoint()
+            return util.IsSpawnPoint( ENTITY.GetClass( self ) )
         end
 
     end
@@ -828,7 +913,6 @@ do
 
 end
 
--- Only server features
 if SERVER then
 
     -- util.Explosion( pos, radius, damage )
@@ -858,6 +942,12 @@ if SERVER then
             return dmg, fx
         end
 
+    end
+
+    -- game.GetWorldSize()
+    function game.GetWorldSize()
+        local world = game.GetWorld()
+        return world:GetInternalVariable( "m_WorldMins" ), world:GetInternalVariable( "m_WorldMaxs" )
     end
 
     -- game.ChangeMap( `string` map )
