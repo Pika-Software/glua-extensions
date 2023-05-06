@@ -528,6 +528,7 @@ do
         classes["info_hint"] = true
         classes["info_node_hint"] = true
         classes["info_node_air_hint"] = true
+        classes["info_node_air"] = true
         classes["info_node_climb"] = true
 
         -- util.IsInfoNodeClass( className )
