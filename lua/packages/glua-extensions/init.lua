@@ -524,6 +524,7 @@ do
 
         local classes = list.GetForEdit( "info-node-classes" )
 
+        classes["info_node"] = true
         classes["info_hint"] = true
         classes["info_node_hint"] = true
         classes["info_node_air_hint"] = true
