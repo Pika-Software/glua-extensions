@@ -225,6 +225,13 @@ function util.TracePenetration( traceData, onPenetration, remainingTraces )
     traceData.start = traceResult.HitPos + traceResult.Normal
     remainingTraces = remainingTraces - 1
 
+    -- if traceResult.Hit then
+    --     local entity = traceResult.Entity
+    --     if IsValid( entity ) then
+    --         traceData.filter = entity
+    --     end
+    -- end
+
     local result = onPenetration( traceResult )
     if type( result ) == "table" then
         table.Merge( traceData, result )
@@ -623,6 +630,8 @@ do
     end
 
     if SERVER then
+
+        local IsValid = IsValid
 
         -- Entity:Dissolve()
         function ENTITY:Dissolve()
