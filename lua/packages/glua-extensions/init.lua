@@ -11,6 +11,7 @@ local hook = hook
 -- Variables
 local getmetatable = getmetatable
 local gPackage = gpm.Package
+local IsValid = IsValid
 local ipairs = ipairs
 local pairs = pairs
 local type = type
@@ -224,13 +225,6 @@ function util.TracePenetration( traceData, onPenetration, remainingTraces )
     local traceResult = util.TraceLine( traceData )
     traceData.start = traceResult.HitPos + traceResult.Normal
     remainingTraces = remainingTraces - 1
-
-    -- if traceResult.Hit then
-    --     local entity = traceResult.Entity
-    --     if IsValid( entity ) then
-    --         traceData.filter = entity
-    --     end
-    -- end
 
     local result = onPenetration( traceResult )
     if type( result ) == "table" then
@@ -631,8 +625,6 @@ do
 
     if SERVER then
 
-        local IsValid = IsValid
-
         -- Entity:Dissolve()
         function ENTITY:Dissolve()
             if not self:IsValid() then return false end
@@ -655,6 +647,56 @@ do
             dissolver:Fire( "dissolve", temporaryName, 0 )
 
             return true
+        end
+
+        -- Entity timers
+        do
+
+            local packageMarker = gPackage:GetIdentifier( "entity-timers" )
+            local timer = timer
+
+            -- Entity:GetTimerIdentifier( identifier )
+            function ENTITY:GetTimerIdentifier( identifier )
+                if type( identifier ) ~= "string" then
+                    return packageMarker .. " - N/A [" .. self:EntIndex() .. "]"
+                end
+
+                return packageMarker .. " - " .. identifier .. " [" .. self:EntIndex() .. "]"
+            end
+
+            -- Entity:CreateTimer( identifier, delay, repetitions, func )
+            function ENTITY:CreateTimer( identifier, delay, repetitions, func )
+                identifier = self:GetTimerIdentifier( identifier )
+
+                timer.Create( identifier, delay, repetitions, function()
+                    if IsValid( self ) then
+                        func( self )
+                        return
+                    end
+
+                    timer.Remove( identifier )
+                end )
+            end
+
+            -- Entity:RemoveTimer( identifier )
+            function ENTITY:RemoveTimer( identifier )
+                timer.Remove( self:GetTimerIdentifier( identifier ) )
+            end
+
+            -- Entity:IsTimerExists( identifier )
+            function ENTITY:IsTimerExists( identifier )
+                return timer.Exists( self:GetTimerIdentifier( identifier ) )
+            end
+
+            -- Entity:SimpleTimer( delay, func )
+            function ENTITY:SimpleTimer( delay, func )
+                timer.Simple( delay, function()
+                    if IsValid( self ) then
+                        func( self )
+                    end
+                end )
+            end
+
         end
 
     end
@@ -898,6 +940,13 @@ do
                 net.WriteBit( false )
                 net.WriteString( url )
             net.Send( self )
+        end
+
+
+        -- Player:IsFamilyShared()
+        function PLAYER:IsFamilyShared()
+            if self:IsBot() then return false end
+            return self:SteamID64() ~= self:OwnerSteamID64()
         end
 
     end
