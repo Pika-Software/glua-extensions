@@ -1104,6 +1104,15 @@ if CLIENT then
         hook.Run( "PlayerInitialized", LocalPlayer() )
     end )
 
+    do
+
+        local ply = LocalPlayer()
+        if IsValid( ply ) then
+            hook.Run( "PlayerInitialized", ply )
+        end
+
+    end
+
     -- ents.Create aliase for client
     ents.Create = ents.CreateClientside
 
