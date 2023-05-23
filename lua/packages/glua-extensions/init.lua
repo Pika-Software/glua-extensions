@@ -830,7 +830,10 @@ do
 
     -- Entity:GetHitBoxBoundsByBone( bone )
     function ENTITY:GetHitBoxBoundsByBone( bone )
-        return ENTITY.GetHitBoxBounds( self, ENTITY.GetHitBox( self, bone ) )
+        local mins, maxs = ENTITY.GetHitBox( self, bone )
+        if not mins or not maxs then return end
+
+        return ENTITY.GetHitBoxBounds( self, mins, maxs )
     end
 
     -- Entity:GetHitBoxBoundsByBoneName( pattern )
