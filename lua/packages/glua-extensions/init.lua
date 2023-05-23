@@ -1100,16 +1100,13 @@ if CLIENT then
     end )
 
     -- GM:PlayerInitialized( ply )
-    hook.Add( "InitPostEntity", gPackage:GetIdentifier( "player-initialized" ), function()
-        hook.Run( "PlayerInitialized", LocalPlayer() )
-    end )
-
     do
 
-        local ply = LocalPlayer()
-        if IsValid( ply ) then
-            hook.Run( "PlayerInitialized", ply )
-        end
+        local hookName = gPackage:GetIdentifier( "player-initialized" )
+        hook.Add( "RenderScene", hookName, function()
+            hook.Remove( "RenderScene", hookName )
+            hook.Run( "PlayerInitialized", LocalPlayer() )
+        end )
 
     end
 
