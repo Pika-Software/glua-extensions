@@ -292,7 +292,7 @@ end
 -- engine.GetGMAFiles( filePath )
 do
 
-    local gmad = gpm.gmad
+    local gmad = gmad
 
     function game.GetGMAFiles( filePath, gamePath )
         local gma = gmad.Open( filePath, gamePath )
