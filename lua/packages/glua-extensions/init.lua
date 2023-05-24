@@ -625,6 +625,20 @@ do
 
     if SERVER then
 
+        -- Entity:GetUnbreakable()
+        function ENTITY:GetUnbreakable()
+            return self.__unbreakable or false
+        end
+
+        -- Entity:SetUnbreakable( bool )
+        function ENTITY:SetUnbreakable( bool )
+            self.__unbreakable = bool == true
+        end
+
+        hook.Add( "EntityTakeDamage", gPackage:GetIdentifier( "unbreakable" ), function( ent )
+            if ent.__unbreakable then return true end
+        end )
+
         -- Entity:Dissolve()
         function ENTITY:Dissolve()
             if not self:IsValid() then return false end

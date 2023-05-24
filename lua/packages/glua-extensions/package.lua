@@ -1,4 +1,4 @@
 name = "glua-extensions"
 main = "init.lua"
-version = 001604
+version = 001700
 autorun = true
