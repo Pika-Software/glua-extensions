@@ -238,6 +238,40 @@ function util.TracePenetration( traceData, onPenetration, remainingTraces )
     return traceResult
 end
 
+do
+
+    local Vector = Vector
+
+    function util.TraceReflection( traceData, onReflect, remainingTraces )
+        if not remainingTraces then
+            remainingTraces = 10
+        end
+
+        local vec = Vector( 2 ^ 16 )
+        vec:Rotate( traceData.angle )
+
+        traceData.endpos = traceData.start + vec
+
+        local traceResult = util.TraceLine( traceData )
+        if not traceResult.Hit then return traceResult end
+
+        traceData.start = traceResult.HitPos
+        traceData.angle = -traceData.angle
+
+        local result = onReflect( traceResult )
+        if type( result ) == "table" then
+            table.Merge( traceData, result )
+        end
+
+        if result ~= false and remainingTraces > 0 then
+            return util.TraceReflection( traceData, onReflect, remainingTraces - 1 )
+        end
+
+        return traceResult
+    end
+
+end
+
 -- file.IsBSP( filePath, gamePath )
 function file.IsBSP( filePath, gamePath )
     return file.Read( filePath, gamePath, 4 ) == "VBSP"
