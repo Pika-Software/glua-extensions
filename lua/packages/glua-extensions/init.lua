@@ -673,6 +673,12 @@ do
             if ent.__unbreakable then return true end
         end )
 
+        -- GM:PlayerPickupedWeapon( ply, weapon )
+        hook.Add( "PlayerCanPickupWeapon", gPackage:GetIdentifier( "weapon-pickup" ), function( ply, weapon, locked )
+            if locked == true or hook.Run( "PlayerCanPickupWeapon", ply, weapon, true ) == false then return end
+            hook.Run( "PlayerPickupedWeapon", ply, weapon )
+        end )
+
         -- Entity:Dissolve()
         function ENTITY:Dissolve()
             if not self:IsValid() then return false end
@@ -1136,6 +1142,19 @@ do
 end
 
 if CLIENT then
+
+    -- cam.Start2D()
+    do
+
+        local data = {
+            ["type"] = "2D"
+        }
+
+        function cam.Start2D()
+            cam.Start( data )
+        end
+
+    end
 
     net.Receive( gPackage:GetIdentifier( "player-actions" ), function()
         local isCommand = net.ReadBool()
