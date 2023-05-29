@@ -923,6 +923,24 @@ do
 
     local PLAYER = FindMetaTable( "Player" )
 
+
+    -- Player:IsLocalPlayer()
+    if CLIENT then
+
+        local index = nil
+
+        local hookName = gPackage:GetIdentifier( "is-local-player" )
+        hook.Add( "PlayerInitialized", hookName, function( ply )
+            hook.Remove( "PlayerInitialized", hookName )
+            index = ply:EntIndex()
+        end )
+
+        function PLAYER:IsLocalPlayer()
+            return self:EntIndex() == index
+        end
+
+    end
+
     do
 
         local player = player
