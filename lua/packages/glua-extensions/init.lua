@@ -182,6 +182,97 @@ function table.MultiRemove( tbl, index, length )
     return result
 end
 
+-- util.NiceFloat( number )
+function util.NiceFloat( number )
+    return string.TrimRight( string.TrimRight( string.format( "%f", number ), "0" ), "." )
+end
+
+-- util.TypeToString( any, depth )
+do
+
+    local tostring = tostring
+
+    function util.TypeToString( any, depth )
+        local valueType = type( any )
+        if valueType ~= "table" then
+            if valueType == "boolean" then
+                return any == true and "true" or "false"
+            elseif valueType == "number" then
+                return tostring( util.NiceFloat( any ) )
+            elseif valueType == "Entity" then
+                if IsValid( any ) then
+                    if any:IsPlayer() then
+                        return "player.GetBySteamID( \"" .. any:SteamID() .. "\" )"
+                    end
+
+                    return "Entity( " .. any:EntIndex() .. " )"
+                end
+
+                return "NULL"
+            elseif valueType == "Vector" or valueType == "Angle" then
+                return string.format( "%s( %s, %s, %s )", valueType, util.TypeToString( any[ 1 ] ), util.TypeToString( any[ 2 ] ), util.TypeToString( any[ 3 ] ) )
+            elseif valueType == "Color" then
+                return string.format( "%s( %s, %s, %s, %s )", valueType, util.TypeToString( any.r ), util.TypeToString( any.g ), util.TypeToString( any.b ), util.TypeToString( any.a ) )
+            end
+
+            return "\"" .. tostring( any ) .. "\""
+        end
+
+        local isSequential, length = true, 0
+        for _ in pairs( any ) do
+            length = length + 1
+
+            if isSequential and any[ length ] == nil then
+                isSequential = false
+            end
+        end
+
+        depth = ( depth or 0 ) + 1
+
+        local tabs, str = "", "{"
+        if not isSequential then
+            tabs = string.rep( "\t", depth )
+            str = str .. "\n"
+        end
+
+        local index = 0
+        for key, value in pairs( any ) do
+            index = index + 1
+            str = str .. tabs
+
+            if isSequential then
+                str = str .. " "
+            else
+                local keyType = type( key )
+                if keyType ~= "number" then
+                    key = util.TypeToString( key, depth )
+                end
+
+                str = str .. "[ " .. key .. " ] = "
+            end
+
+            str = str .. util.TypeToString( value, depth )
+
+            if index ~= length then
+                str = str .. ","
+            elseif isSequential then
+                str = str .. " "
+            end
+
+            if not isSequential then
+                str = str .. "\n"
+            end
+        end
+
+        if not isSequential then
+            str = str .. string.rep( "\t", depth - 1 )
+        end
+
+        return str .. "}"
+    end
+
+end
+
 -- util.RandomUUID()
 -- https://gitlab.com/DBotThePony/DLib/-/blob/develop/lua_src/dlib/util/util.lua#L598
 function util.RandomUUID()
