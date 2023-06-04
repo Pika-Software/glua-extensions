@@ -1,3 +1,4 @@
+
 -- Libraries
 local engine = engine
 local string = string
@@ -353,18 +354,19 @@ end
 
 do
 
+    local encoder = install( "packages/glua-encoder", "https://github.com/Pika-Software/glua-encoder" )
     local net = net
 
-    -- net.ReadCompressTable( bitsCount )
-    function net.ReadCompressTable( bitsCount )
-        return util.JSONToTable( util.Decompress( net.ReadData( net.ReadUInt( bitsCount or 16 ) ) ) )
+    function net.ReadCompressedType( bitsCount )
+        return encoder.Decode( net.ReadData( net.ReadUInt( bitsCount or 16 ) ), true )
     end
 
-    -- net.WriteCompressTable( tbl, bitsCount )
-    function net.WriteCompressTable( tbl, bitsCount )
-        local data = util.Compress( util.TableToJSON( tbl ) )
-        net.WriteUInt( #data, bitsCount or 16 )
-        net.WriteData( data, #data )
+    function net.WriteCompressedType( any, bitsCount )
+        local data = encoder.Encode( any, true )
+        local length = string.len( data )
+        net.WriteUInt( length, bitsCount or 16 )
+        net.WriteData( data, length )
+        return length, data
     end
 
     -- net.Remove( name )
