@@ -515,12 +515,12 @@ end
 
 -- game.HasMap( mapName, addonTitle )
 function game.HasMap( mapName, addonTitle )
-    return file.Exists( "maps/" .. mapName .. ".bsp", addonTitle or "GAME" )
+    return file.IsFile( "maps/" .. mapName .. ".bsp", addonTitle or "GAME" )
 end
 
 -- game.HasMapNav( mapName, addonTitle )
 function game.HasMapNav( mapName, addonTitle )
-    return file.Exists( "maps/" .. mapName .. ".nav", addonTitle or "GAME" )
+    return file.IsFile( "maps/" .. mapName .. ".nav", addonTitle or "GAME" )
 end
 
 -- game.GetMaps( addonTitle )
@@ -1435,10 +1435,10 @@ if CLIENT then
             local countryCode = langToCountry[ languageCode ] or languageCode
 
             local filePath0 = "materials/flags16/" .. countryCode .. ".png"
-            if file.Exists( filePath0, "GAME" ) then return filePath0 end
+            if file.IsFile( filePath0, "GAME" ) then return filePath0 end
 
             local filePath1 = "resource/localization/" .. countryCode .. ".png"
-            if file.Exists( filePath1, "GAME" ) then return filePath1 end
+            if file.IsFile( filePath1, "GAME" ) then return filePath1 end
 
             return "html/img/unk_flag.png"
         end
