@@ -762,12 +762,12 @@ do
             self.__unbreakable = bool == true
         end
 
-        hook.Add( "EntityTakeDamage", gPackage:GetIdentifier( "unbreakable" ), function( ent )
+        hook.Add( "EntityTakeDamage", "Unbreakable", function( ent )
             if ent.__unbreakable then return true end
         end )
 
         -- GM:PlayerPickupedWeapon( ply, weapon )
-        hook.Add( "PlayerCanPickupWeapon", gPackage:GetIdentifier( "weapon-pickup" ), function( ply, weapon, locked )
+        hook.Add( "PlayerCanPickupWeapon", "PlayerPickupedWeapon", function( ply, weapon, locked )
             if locked == true or hook.Run( "PlayerCanPickupWeapon", ply, weapon, true ) == false then return end
             hook.Run( "PlayerPickupedWeapon", ply, weapon )
         end )
@@ -1022,9 +1022,8 @@ do
 
         local index = nil
 
-        local hookName = gPackage:GetIdentifier( "is-local-player" )
-        hook.Add( "PlayerInitialized", hookName, function( ply )
-            hook.Remove( "PlayerInitialized", hookName )
+        hook.Add( "PlayerInitialized", "IsLocalPlayer", function( ply )
+            hook.Remove( "PlayerInitialized", "IsLocalPlayer" )
             index = ply:EntIndex()
         end )
 
@@ -1090,13 +1089,13 @@ do
 
     if SERVER then
 
-        local networkString = gPackage:GetIdentifier( "player-actions" )
+        local messageName = gPackage:GetIdentifier( "player-actions" )
 
-        util.AddNetworkString( networkString )
+        util.AddNetworkString( messageName )
 
         -- Player:ConCommand( command )
         function PLAYER:ConCommand( command )
-            net.Start( networkString )
+            net.Start( messageName )
                 net.WriteBit( true )
                 net.WriteString( command )
             net.Send( self )
@@ -1104,7 +1103,7 @@ do
 
         -- Player:OpenURL( url )
         function PLAYER:OpenURL( url )
-            net.Start( networkString )
+            net.Start( messageName )
                 net.WriteBit( false )
                 net.WriteString( url )
             net.Send( self )
@@ -1226,11 +1225,11 @@ if SERVER then
     -- GM:PlayerInitialized( ply )
     local queue = {}
 
-    hook.Add( "PlayerInitialSpawn", gPackage:GetIdentifier( "player-initialized" ), function( ply )
+    hook.Add( "PlayerInitialSpawn", "PlayerInitialized", function( ply )
         queue[ ply ] = true
     end )
 
-    hook.Add( "SetupMove", gPackage:GetIdentifier( "player-initialized" ), function( ply, _, cmd )
+    hook.Add( "SetupMove", "PlayerInitialized", function( ply, _, cmd )
         if queue[ ply ] and not cmd:IsForced() then
             ply:SetNW2Bool( "m_pInitialized", true )
             queue[ ply ] = nil
@@ -1281,15 +1280,10 @@ if CLIENT then
     end )
 
     -- GM:PlayerInitialized( ply )
-    do
-
-        local hookName = gPackage:GetIdentifier( "player-initialized" )
-        hook.Add( "RenderScene", hookName, function()
-            hook.Remove( "RenderScene", hookName )
-            hook.Run( "PlayerInitialized", LocalPlayer() )
-        end )
-
-    end
+    hook.Add( "RenderScene", "PlayerInitialized", function()
+        hook.Remove( "RenderScene", "PlayerInitialized" )
+        hook.Run( "PlayerInitialized", LocalPlayer() )
+    end )
 
     -- ents.Create aliase for client
     ents.Create = ents.CreateClientside
@@ -1324,7 +1318,6 @@ if CLIENT then
         function render.GetLightLevel( origin )
             local vec = render_GetLightColor( origin )
             return ( vec[ 1 ] + vec[ 2 ] + vec[ 3 ] ) / 3
-
         end
     end
 
@@ -1338,7 +1331,7 @@ if CLIENT then
             return width, height
         end
 
-        hook.Add( "OnScreenSizeChanged", gPackage:GetIdentifier( "screen-resolution" ), function(  oldWidth, oldHeight )
+        hook.Add( "OnScreenSizeChanged", "ScreenResolutionChanged", function(  oldWidth, oldHeight )
             screenWidth, screenHeight = ScrW(), ScrH()
             hook.Run( "ScreenResolutionChanged", width, height, oldWidth, oldHeight )
         end )
@@ -1351,7 +1344,7 @@ if CLIENT then
         local gui_IsGameUIVisible = gui.IsGameUIVisible
         local status = gui_IsGameUIVisible()
 
-        hook.Add( "Think", gPackage:GetIdentifier( "game-ui" ), function()
+        hook.Add( "Think", "GameUIToggled", function()
             local current = gui_IsGameUIVisible()
             if status == current then return end
             status = current
@@ -1367,7 +1360,7 @@ if CLIENT then
         local system_HasFocus = system.HasFocus
         local focus = system_HasFocus()
 
-        hook.Add( "Think", gPackage:GetIdentifier( "focus" ), function()
+        hook.Add( "Think", "WindowFocusChanged", function()
             local current = system_HasFocus()
             if focus == current then return end
             focus = current
@@ -1378,16 +1371,10 @@ if CLIENT then
     end
 
     -- GM:PlayerDisconnected( ply )
-    do
-
-        local hookName = gPackage:GetIdentifier( "player-disconnected" )
-
-        hook.Add( "ShutDown", hookName, function()
-            hook.Remove( "ShutDown", hookName )
-            hook.Run( "PlayerDisconnected", LocalPlayer() )
-        end )
-
-    end
+    hook.Add( "ShutDown", "PlayerDisconnected", function()
+        hook.Remove( "ShutDown", "PlayerDisconnected" )
+        hook.Run( "PlayerDisconnected", LocalPlayer() )
+    end )
 
     local language = language
 
@@ -1466,7 +1453,7 @@ end
 -- GM:LanguageChanged( languageCode, oldLanguageCode )
 cvars.AddChangeCallback( "gmod_language", function( _, old, new )
     hook.Run( "LanguageChanged", new, old )
-end, gPackage:GetIdentifier( "gmod-language" ) )
+end, "LanguageChanged" )
 
 local http = http
 

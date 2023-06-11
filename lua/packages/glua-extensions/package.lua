@@ -1,3 +1,3 @@
 name = "glua-extensions"
-version = 002201
+version = 002202
 autorun = true
