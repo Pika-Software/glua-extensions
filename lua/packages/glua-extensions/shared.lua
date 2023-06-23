@@ -410,14 +410,19 @@ function engine.GetAddon( wsid )
     end
 end
 
--- game.GetAddonFiles( wsid )
-function game.GetAddonFiles( wsid )
+-- engine.GetPlayerGravity()
+function engine.GetPlayerGravity()
+    return physenv.GetGravity() * FrameTime() / 2
+end
+
+-- engine.GetAddonFiles( wsid )
+function engine.GetAddonFiles( wsid )
     local addon = engine.GetAddon( wsid )
     if not addon then return end
     return file.FindAll( "", addon.title )
 end
 
--- engine.GetGMAFiles( filePath )
+-- game.GetGMAFiles( filePath )
 do
 
     local gmad = gmad
