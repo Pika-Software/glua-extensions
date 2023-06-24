@@ -204,7 +204,7 @@ do
             elseif valueType == "Entity" then
                 if IsValid( any ) then
                     if any:IsPlayer() then
-                        return "player.GetBySteamID( \"" .. any:SteamID() .. "\" )"
+                        return "player.GetBySteamID64( \"" .. any:SteamID64() .. "\" )"
                     end
 
                     return "Entity( " .. any:EntIndex() .. " )"
