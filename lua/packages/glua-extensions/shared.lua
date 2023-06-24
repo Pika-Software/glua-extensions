@@ -892,13 +892,6 @@ do
         return ENTITY.GetHitBoxBounds( self, mins, maxs )
     end
 
-    -- Entity:GetHitBoxBoundsByBoneName( pattern )
-    function ENTITY:GetHitBoxBoundsByBoneName( pattern )
-        local bone = ENTITY.FindBone( self, pattern )
-        if not bone or bone < 0 then return end
-        return ENTITY.GetHitBoxBoundsByBone( self, bone )
-    end
-
     -- Entity:GetViewAngle( pos )
     function ENTITY:GetViewAngle( pos )
         return util.GetViewAngle( self:EyePos(), self:EyeAngles(), pos )
