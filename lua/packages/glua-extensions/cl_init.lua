@@ -149,6 +149,22 @@ do
 
 end
 
+do
+
+    local ENTITY = FindMetaTable( "Entity" )
+
+    -- Entity:DrawModelWithChildren( flags )
+    function ENTITY:DrawModelWithChildren( flags, ignoreNoDraw )
+        if not ignoreNoDraw and ( self:GetNoDraw() or self:IsEffectActive( EF_NODRAW ) ) then return end
+        self:DrawModel( flags )
+
+        for _, child in ipairs( self:GetChildren() ) do
+            child:DrawModelWithChildren( flags )
+        end
+    end
+
+end
+
 -- string.Translate( str )
 do
 
