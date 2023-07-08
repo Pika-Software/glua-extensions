@@ -1,5 +1,5 @@
 name = "glua-extensions"
-version = 002600
+version = 002700
 autorun = true
 init = {
     ["client"] = "cl_init.lua",

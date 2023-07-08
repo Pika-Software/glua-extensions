@@ -11,10 +11,35 @@ local hook = hook
 
 -- Variables
 local getmetatable = getmetatable
+local ArgAssert = ArgAssert
 local IsValid = IsValid
 local ipairs = ipairs
 local pairs = pairs
 local type = type
+
+-- AccessorFunc2( tbl, key, name, valueType )
+function AccessorFunc2( tbl, key, name, valueType )
+    ArgAssert( tbl, 1, "table" )
+    ArgAssert( key, 2, "string" )
+    ArgAssert( name, 3, "string" )
+
+    tbl[ "Get" .. name ] = function( self )
+        return table.Lookup( self, key )
+    end
+
+    if not valueType then
+        tbl[ "Set" .. name ] = function( self, value )
+            table.SetValue( self, key, value )
+        end
+
+        return
+    end
+
+    tbl[ "Set" .. name ] = function( self, value )
+        ArgAssert( value, 2, valueType )
+        table.SetValue( self, key, value )
+    end
+end
 
 -- concommand.Exists( name )
 do
@@ -159,11 +184,11 @@ end
 
 -- table.ConcatKeys( tbl, concatenator )
 function table.ConcatKeys( tbl, concatenator )
-    concatenator = concatenator or ''
+    concatenator = concatenator or ""
 
-    local str = ''
+    local str = ""
     for key in pairs( tbl ) do
-        str = ( str ~= '' and concatenator or str ) .. key
+        str = ( str ~= "" and concatenator or str ) .. key
     end
 
     return str
