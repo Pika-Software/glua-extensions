@@ -1,4 +1,3 @@
-
 -- Libraries
 local engine = engine
 local string = string
@@ -1049,6 +1048,9 @@ do
 
     -- Player:IsFullyConnected()
     function PLAYER:IsFullyConnected()
+        return self:GetNW2Bool( "fully-connected", false )
+    end
+
     -- Player:UniqueID2()
     do
 

@@ -69,19 +69,10 @@ end
 -- GM:PlayerInitialized( ply )
 do
 
-    local queue = {}
-
-    hook.Add( "PlayerInitialSpawn", "PlayerInitialized", function( ply )
-        queue[ ply ] = true
-    end )
-
     hook.Add( "SetupMove", "PlayerInitialized", function( ply, _, cmd )
-        if queue[ ply ] and not cmd:IsForced() then
-            ply:SetNW2Bool( "m_pInitialized", true )
-            queue[ ply ] = nil
-
-            hook.Run( "PlayerInitialized", ply )
-        end
+        if ply:IsFullyConnected() or not cmd:IsForced() then return end
+        ply:SetNW2Bool( "fully-connected", true )
+        hook.Run( "PlayerInitialized", ply )
     end )
 
 end
