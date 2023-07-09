@@ -229,7 +229,7 @@ do
             elseif valueType == "Entity" then
                 if IsValid( any ) then
                     if any:IsPlayer() then
-                        return "player.GetBySteamID64( \"" .. any:SteamID64() .. "\" )"
+                        return "player.GetByUniqueID2( \"" .. any:UniqueID2() .. "\" )"
                     end
 
                     return "Entity( " .. any:EntIndex() .. " )"
@@ -995,6 +995,14 @@ do
 
         end
 
+        function player.GetByUniqueID2( uid )
+            for _, ply in ipairs( player.GetAll() ) do
+                if ply:UniqueID2() == uid then
+                    return ply
+                end
+            end
+        end
+
     end
 
     -- Player:IsSpectator()
@@ -1041,7 +1049,25 @@ do
 
     -- Player:IsFullyConnected()
     function PLAYER:IsFullyConnected()
-        return self:GetNW2Bool( "m_pInitialized", false )
+    -- Player:UniqueID2()
+    do
+
+        local cache = {}
+
+        function PLAYER:UniqueID2()
+            if self:IsBot() then
+                local nickname = self:Nick()
+                local cached = cache[ nickname ]
+                if cached ~= nil then return cached end
+                return util.MD5( nickname )
+            end
+
+            local steamid64 = self:SteamID64() or self:Nick()
+            local cached = cache[ steamid64 ]
+            if cached ~= nil then return cached end
+            return util.MD5( steamid64 )
+        end
+
     end
 
 end
