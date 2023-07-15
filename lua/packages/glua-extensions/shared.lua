@@ -566,15 +566,16 @@ function string.Hash( str )
     return hash
 end
 
--- string.UnicodeToChar( str )
 do
 
     local utf8 = utf8
 
+    -- utf8.HexToChar( hexString )
     function utf8.HexToChar( hexString )
         return utf8.char( tonumber( hexString, 16 ) )
     end
 
+    -- string.uchar( str )
     function string.uchar( str )
         return string.gsub( str, "\\u(%w%w%w%w)", utf8.HexToChar )
     end
