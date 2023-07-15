@@ -11,6 +11,7 @@ local hook = hook
 -- Variables
 local getmetatable = getmetatable
 local ArgAssert = ArgAssert
+local tonumber = tonumber
 local IsValid = IsValid
 local ipairs = ipairs
 local pairs = pairs
@@ -53,16 +54,6 @@ do
         return completeList[ name ] ~= nil
     end
 
-end
-
--- string.Hash( str )
-function string.Hash( str )
-    local hash = 0
-    for _, byte in ipairs( { string.byte( str, 0, #str ) } ) do
-        hash = math.fmod( byte + ( ( hash * 32 ) - hash ), 0x07FFFFFF )
-    end
-
-    return hash
 end
 
 -- table.FastCopy( tbl, issequential, buffer )
@@ -565,6 +556,31 @@ function game.GetMaps( addonTitle )
     return result
 end
 
+-- string.Hash( str )
+function string.Hash( str )
+    local hash = 0
+    for _, byte in ipairs( { string.byte( str, 0, #str ) } ) do
+        hash = math.fmod( byte + ( ( hash * 32 ) - hash ), 0x07FFFFFF )
+    end
+
+    return hash
+end
+
+-- string.UnicodeToChar( str )
+do
+
+    local utf8 = utf8
+
+    function utf8.HexToChar( hexString )
+        return utf8.char( tonumber( hexString, 16 ) )
+    end
+
+    function string.uchar( str )
+        return string.gsub( str, "\\u(%w%w%w%w)", utf8.HexToChar )
+    end
+
+end
+
 -- string.GetCharCount( str, char )
 function string.GetCharCount( str, char )
     local counter = 0
@@ -841,7 +857,9 @@ do
 
         function ENTITY:GetLocalBonePosition( bone )
             local pos, ang = ENTITY.GetAbsoluteBonePosition( self, bone )
-            return WorldToLocal( pos, ang, ENTITY.GetPos( self ), ENTITY.GetAngles( self ) )
+            if pos ~= nil and ang ~= nil then
+                return WorldToLocal( pos, ang, ENTITY.GetPos( self ), ENTITY.GetAngles( self ) )
+            end
         end
 
     end
@@ -1100,16 +1118,10 @@ function http.Encode( str )
 end
 
 -- http.Decode( str )
-do
-
-    local tonumber = tonumber
-
-    function http.Decode( str )
-        return string.gsub( string.gsub( str, "+", " " ), "%%(%x%x)", function( c )
-            return string.char( tonumber( c, 16 ) )
-        end )
-    end
-
+function http.Decode( str )
+    return string.gsub( string.gsub( str, "+", " " ), "%%(%x%x)", function( c )
+        return string.char( tonumber( c, 16 ) )
+    end )
 end
 
 -- http.ParseQuery( str )

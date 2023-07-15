@@ -9,6 +9,7 @@ local net = net
 
 -- Variables
 local LocalPlayer = LocalPlayer
+local ipairs = ipairs
 
 -- cam.Start2D()
 do
@@ -239,6 +240,16 @@ do
     -- language.Set( languageCode )
     function language.Set( languageCode )
         RunConsoleCommand( gmod_language:GetName(), languageCode )
+    end
+
+    -- language.GetPhrases( str )
+    function language.GetPhrases( str )
+        local result = {}
+        for placeholder, fullText in string.gmatch( str, "([%w_%-]-)=(%C+)" ) do
+            result[ placeholder ] = string.uchar( fullText )
+        end
+
+        return result
     end
 
 end
