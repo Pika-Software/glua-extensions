@@ -5,7 +5,6 @@ local hook = hook
 local file = file
 local cam = cam
 local gui = gui
-local net = net
 
 -- Variables
 local LocalPlayer = LocalPlayer
@@ -23,19 +22,6 @@ do
     end
 
 end
-
-net.Receive( _PKG:GetIdentifier( "player-actions" ), function()
-    local isCommand = net.ReadBool()
-    local str = net.ReadString()
-    if #str < 1 then return end
-
-    if isCommand then
-        LocalPlayer():ConCommand( str )
-        return
-    end
-
-    gui.OpenURL( str )
-end )
 
 -- GM:PlayerInitialized( ply )
 hook.Add( "RenderScene", "PlayerInitialized", function()

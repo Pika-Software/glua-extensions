@@ -180,27 +180,7 @@ end
 
 do
 
-    local messageName = _PKG:GetIdentifier( "player-actions" )
     local PLAYER = FindMetaTable( "Player" )
-
-    util.AddNetworkString( messageName )
-
-    -- Player:ConCommand( command )
-    function PLAYER:ConCommand( command )
-        net.Start( messageName )
-            net.WriteBit( true )
-            net.WriteString( command )
-        net.Send( self )
-    end
-
-    -- Player:OpenURL( url )
-    function PLAYER:OpenURL( url )
-        net.Start( messageName )
-            net.WriteBit( false )
-            net.WriteString( url )
-        net.Send( self )
-    end
-
 
     -- Player:IsFamilyShared()
     function PLAYER:IsFamilyShared()
