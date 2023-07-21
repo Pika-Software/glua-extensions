@@ -1013,6 +1013,7 @@ do
 
         end
 
+        -- player.GetByUniqueID2( uid )
         function player.GetByUniqueID2( uid )
             for _, ply in ipairs( player.GetAll() ) do
                 if ply:UniqueID2() == uid then
