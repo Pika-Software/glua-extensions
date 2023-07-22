@@ -608,345 +608,354 @@ function string.Capitalize( str )
     return string.upper( string.sub( str, 1, 1 ) ) .. string.sub( str, 2, #str )
 end
 
+local ENTITY = FindMetaTable( "Entity" )
+
 do
 
-    local ENTITY = FindMetaTable( "Entity" )
+    local classes = list.GetForEdit( "prop-classes" )
+    classes["prop_physics_multiplayer"] = true
+    classes["prop_physics_override"] = true
+    classes["prop_dynamic_override"] = true
+    classes["prop_dynamic"] = true
+    classes["prop_ragdoll"] = true
+    classes["prop_physics"] = true
+    classes["prop_detail"] = true
+    classes["prop_static"] = true
 
-    do
-
-        local classes = list.GetForEdit( "prop-classes" )
-        classes["prop_physics_multiplayer"] = true
-        classes["prop_physics_override"] = true
-        classes["prop_dynamic_override"] = true
-        classes["prop_dynamic"] = true
-        classes["prop_ragdoll"] = true
-        classes["prop_physics"] = true
-        classes["prop_detail"] = true
-        classes["prop_static"] = true
-
-        -- util.IsPropClass( className )
-        function util.IsPropClass( className )
-            return classes[ className ] or false
-        end
-
-        -- Entity:IsProp()
-        function ENTITY:IsProp()
-            return util.IsPropClass( ENTITY.GetClass( self ) )
-        end
-
+    -- util.IsPropClass( className )
+    function util.IsPropClass( className )
+        return classes[ className ] or false
     end
 
-    do
-
-        local classes = list.GetForEdit( "door-classes" )
-        classes["prop_testchamber_door"] = true
-        classes["prop_door_rotating"] = true
-        classes["func_door_rotating"] = true
-        classes["func_door"] = true
-
-        -- util.IsDoorClass( className )
-        function util.IsDoorClass( className )
-            return classes[ className ] or false
-        end
-
-        -- Entity:IsDoor()
-        function ENTITY:IsDoor()
-            return util.IsDoorClass( ENTITY.GetClass( self ) )
-        end
-
+    -- Entity:IsProp()
+    function ENTITY:IsProp()
+        return util.IsPropClass( ENTITY.GetClass( self ) )
     end
 
-    do
+end
 
-        local classes = list.GetForEdit( "button-classes" )
-        classes["momentary_rot_button"] = true
-        classes["func_rot_button"] = true
-        classes["func_button"] = true
-        classes["gmod_button"] = true
+do
 
-        -- util.IsButtonClass( className )
-        function util.IsButtonClass( className )
-            return classes[ className ] or false
-        end
+    local classes = list.GetForEdit( "door-classes" )
+    classes["prop_testchamber_door"] = true
+    classes["prop_door_rotating"] = true
+    classes["func_door_rotating"] = true
+    classes["func_door"] = true
 
-        -- Entity:IsButton()
-        function ENTITY:IsButton()
-            return util.IsButtonClass( ENTITY.GetClass( self ) )
-        end
-
+    -- util.IsDoorClass( className )
+    function util.IsDoorClass( className )
+        return classes[ className ] or false
     end
 
-    do
-
-        local classes = list.GetForEdit( "window-classes" )
-
-        classes["func_breakable_surf"] = true
-        classes["func_breakable"] = true
-        classes["func_physbox"] = true
-
-        -- util.IsWindowClass( className )
-        function util.IsWindowClass( className )
-            return classes[ className ] or false
-        end
-
-        -- Entity:IsWindow()
-        function ENTITY:IsWindow()
-            return util.IsWindowClass( ENTITY.GetClass( self ) )
-        end
-
+    -- Entity:IsDoor()
+    function ENTITY:IsDoor()
+        return util.IsDoorClass( ENTITY.GetClass( self ) )
     end
 
-    do
+end
 
-        local classes = list.GetForEdit( "info-node-classes" )
+do
 
-        classes["info_node"] = true
-        classes["info_hint"] = true
-        classes["info_node_hint"] = true
-        classes["info_node_air_hint"] = true
-        classes["info_node_air"] = true
-        classes["info_node_climb"] = true
+    local classes = list.GetForEdit( "button-classes" )
+    classes["momentary_rot_button"] = true
+    classes["func_rot_button"] = true
+    classes["func_button"] = true
+    classes["gmod_button"] = true
 
-        -- util.IsInfoNodeClass( className )
-        function util.IsInfoNodeClass( className )
-            return classes[ className ] or false
-        end
-
-        -- Entity:IsInfoNode()
-        function ENTITY:IsInfoNode()
-            return util.IsInfoNodeClass( ENTITY.GetClass( self ) )
-        end
-
+    -- util.IsButtonClass( className )
+    function util.IsButtonClass( className )
+        return classes[ className ] or false
     end
 
-    do
-
-        local classes = list.GetForEdit( "player-spawns" )
-
-        -- Garry's Mod
-        classes["info_player_start"] = true
-
-        -- Garry's Mod (old)
-        classes["gmod_player_start"] = true
-
-        -- Half-Life 2: Deathmatch
-        classes["info_player_deathmatch"] = true
-        classes["info_player_combine"] = true
-        classes["info_player_rebel"] = true
-
-        -- Counter-Strike: Source & Counter-Strike: Global Offensive
-        classes["info_player_counterterrorist"] = true
-        classes["info_player_terrorist"] = true
-
-        -- Day of Defeat: Source
-        classes["info_player_axis"] = true
-        classes["info_player_allies"] = true
-
-        -- Team Fortress 2
-        classes["info_player_teamspawn"] = true
-
-        -- Insurgency
-        classes["ins_spawnpoint"] = true
-
-        -- AOC
-        classes["aoc_spawnpoint"] = true
-
-        -- Dystopia
-        classes["dys_spawn_point"] = true
-
-        -- Pirates, Vikings, and Knights II
-        classes["info_player_pirate"] = true
-        classes["info_player_viking"] = true
-        classes["info_player_knight"] = true
-
-        -- D.I.P.R.I.P. Warm Up
-        classes["diprip_start_team_blue"] = true
-        classes["diprip_start_team_red"] = true
-
-        -- OB
-        classes["info_player_red"] = true
-        classes["info_player_blue"] = true
-
-        -- Synergy
-        classes["info_player_coop"] = true
-
-        -- Zombie Panic! Source
-        classes["info_player_human"] = true
-        classes["info_player_zombie"] = true
-
-        -- Zombie Master
-        classes["info_player_zombiemaster"] = true
-
-        -- Fistful of Frags
-        classes["info_player_fof"] = true
-        classes["info_player_desperado"] = true
-        classes["info_player_vigilante"] = true
-
-        -- Left 4 Dead & Left 4 Dead 2
-        classes["info_survivor_rescue"] = true
-        -- classes["info_survivor_position"] = true
-
-        -- util.IsSpawnPointClass( className )
-        function util.IsSpawnPointClass( className )
-            return classes[ className ] or false
-        end
-
-        -- Entity:IsSpawnPoint()
-        function ENTITY:IsSpawnPoint()
-            return util.IsSpawnPointClass( ENTITY.GetClass( self ) )
-        end
-
+    -- Entity:IsButton()
+    function ENTITY:IsButton()
+        return util.IsButtonClass( ENTITY.GetClass( self ) )
     end
 
-    -- Entity:FindBone( pattern )
-    do
+end
 
-        local cache = {}
+do
 
-        function ENTITY:FindBone( pattern )
-            local model = ENTITY.GetModel( self )
-            local modelCache = cache[ model ]
-            if not modelCache then
-                modelCache = {}; cache[ model ] = modelCache
+    local classes = list.GetForEdit( "window-classes" )
+
+    classes["func_breakable_surf"] = true
+    classes["func_breakable"] = true
+    classes["func_physbox"] = true
+
+    -- util.IsWindowClass( className )
+    function util.IsWindowClass( className )
+        return classes[ className ] or false
+    end
+
+    -- Entity:IsWindow()
+    function ENTITY:IsWindow()
+        return util.IsWindowClass( ENTITY.GetClass( self ) )
+    end
+
+end
+
+do
+
+    local classes = list.GetForEdit( "info-node-classes" )
+
+    classes["info_node"] = true
+    classes["info_hint"] = true
+    classes["info_node_hint"] = true
+    classes["info_node_air_hint"] = true
+    classes["info_node_air"] = true
+    classes["info_node_climb"] = true
+
+    -- util.IsInfoNodeClass( className )
+    function util.IsInfoNodeClass( className )
+        return classes[ className ] or false
+    end
+
+    -- Entity:IsInfoNode()
+    function ENTITY:IsInfoNode()
+        return util.IsInfoNodeClass( ENTITY.GetClass( self ) )
+    end
+
+end
+
+do
+
+    local classes = list.GetForEdit( "player-spawns" )
+
+    -- Garry's Mod
+    classes["info_player_start"] = true
+
+    -- Garry's Mod (old)
+    classes["gmod_player_start"] = true
+
+    -- Half-Life 2: Deathmatch
+    classes["info_player_deathmatch"] = true
+    classes["info_player_combine"] = true
+    classes["info_player_rebel"] = true
+
+    -- Counter-Strike: Source & Counter-Strike: Global Offensive
+    classes["info_player_counterterrorist"] = true
+    classes["info_player_terrorist"] = true
+
+    -- Day of Defeat: Source
+    classes["info_player_axis"] = true
+    classes["info_player_allies"] = true
+
+    -- Team Fortress 2
+    classes["info_player_teamspawn"] = true
+
+    -- Insurgency
+    classes["ins_spawnpoint"] = true
+
+    -- AOC
+    classes["aoc_spawnpoint"] = true
+
+    -- Dystopia
+    classes["dys_spawn_point"] = true
+
+    -- Pirates, Vikings, and Knights II
+    classes["info_player_pirate"] = true
+    classes["info_player_viking"] = true
+    classes["info_player_knight"] = true
+
+    -- D.I.P.R.I.P. Warm Up
+    classes["diprip_start_team_blue"] = true
+    classes["diprip_start_team_red"] = true
+
+    -- OB
+    classes["info_player_red"] = true
+    classes["info_player_blue"] = true
+
+    -- Synergy
+    classes["info_player_coop"] = true
+
+    -- Zombie Panic! Source
+    classes["info_player_human"] = true
+    classes["info_player_zombie"] = true
+
+    -- Zombie Master
+    classes["info_player_zombiemaster"] = true
+
+    -- Fistful of Frags
+    classes["info_player_fof"] = true
+    classes["info_player_desperado"] = true
+    classes["info_player_vigilante"] = true
+
+    -- Left 4 Dead & Left 4 Dead 2
+    classes["info_survivor_rescue"] = true
+    -- classes["info_survivor_position"] = true
+
+    -- util.IsSpawnPointClass( className )
+    function util.IsSpawnPointClass( className )
+        return classes[ className ] or false
+    end
+
+    -- Entity:IsSpawnPoint()
+    function ENTITY:IsSpawnPoint()
+        return util.IsSpawnPointClass( ENTITY.GetClass( self ) )
+    end
+
+end
+
+-- Entity:FindBone( pattern )
+do
+
+    local cache = {}
+
+    function ENTITY:FindBone( pattern )
+        local model = ENTITY.GetModel( self )
+        local modelCache = cache[ model ]
+        if not modelCache then
+            modelCache = {}; cache[ model ] = modelCache
+        end
+
+        local result = modelCache[ pattern ]
+        if result ~= nil then
+            if result == false then return end
+            return result
+        end
+
+        local invalid, count = 0, ENTITY.GetBoneCount( self )
+        for index = 0, count do
+            local boneName = ENTITY.GetBoneName( self, index )
+            if not boneName then continue end
+
+            if boneName == "__INVALIDBONE__" then
+                invalid = invalid + 1
+                continue
             end
 
-            local result = modelCache[ pattern ]
-            if result ~= nil then
-                if result == false then return end
-                return result
-            end
+            if not string.find( boneName, pattern ) then continue end
 
-            local invalid, count = 0, ENTITY.GetBoneCount( self )
-            for index = 0, count do
-                local boneName = ENTITY.GetBoneName( self, index )
-                if not boneName then continue end
-
-                if boneName == "__INVALIDBONE__" then
-                    invalid = invalid + 1
-                    continue
-                end
-
-                if not string.find( boneName, pattern ) then continue end
-
-                modelCache[ pattern ] = index
-                return index
-            end
-
-            if invalid >= count then return end
-            modelCache[ pattern ] = false
+            modelCache[ pattern ] = index
+            return index
         end
 
+        if invalid >= count then return end
+        modelCache[ pattern ] = false
     end
 
-    -- Entity:GetAbsoluteBonePosition( bone )
-    function ENTITY:GetAbsoluteBonePosition( bone )
-        local pos, ang = ENTITY.GetBonePosition( self, bone )
-        if pos == ENTITY.GetPos( self ) then
-            local matrix = ENTITY.GetBoneMatrix( self, bone )
-            if type( matrix ) == "VMatrix" then
-                pos, ang = matrix:GetTranslation(), matrix:GetAngles()
-            end
-        end
+    hook.Add( "GameContentChanged", "Clear Bone Cache", function()
+        table.Empty( cache )
+    end )
 
-        return pos, ang
-    end
+end
 
-    -- Entity:GetLocalBonePosition( bone )
-    do
-
-        local WorldToLocal = WorldToLocal
-
-        function ENTITY:GetLocalBonePosition( bone )
-            local pos, ang = ENTITY.GetAbsoluteBonePosition( self, bone )
-            if pos ~= nil and ang ~= nil then
-                return WorldToLocal( pos, ang, ENTITY.GetPos( self ), ENTITY.GetAngles( self ) )
-            end
-        end
-
-    end
-
-    -- Entity:GetAbsoluteBonePositionByName( pattern )
-    function ENTITY:GetAbsoluteBonePositionByName( pattern )
-        local bone = ENTITY.FindBone( self, pattern )
-        if not bone or bone < 0 then return end
-        return ENTITY.GetAbsoluteBonePosition( self, bone )
-    end
-
-    -- Entity:GetLocalBonePositionByName( pattern )
-    function ENTITY:GetLocalBonePositionByName( pattern )
-        local bone = ENTITY.FindBone( self, pattern )
-        if not bone or bone < 0 then return end
-        return ENTITY.GetLocalBonePosition( self, bone )
-    end
-
-    -- Entity:FindAttachment( pattern )
-    do
-
-        local cache = {}
-
-        function ENTITY:FindAttachment( pattern )
-            local model = ENTITY.GetModel( self )
-            local modelCache = cache[ model ]
-            if not modelCache then
-                modelCache = {}; cache[ model ] = modelCache
-            end
-
-            local result = modelCache[ pattern ]
-            if result ~= nil then
-                if result == false then return end
-                return result
-            end
-
-            for _, data in ipairs( ENTITY.GetAttachments( self ) ) do
-                if not string.find( data.name, pattern ) then continue end
-                modelCache[ pattern ] = data.id
-                return data.id
-            end
-
-            modelCache[ pattern ] = false
-        end
-
-    end
-
-    -- Entity:GetAttachmentByName( pattern )
-    function ENTITY:GetAttachmentByName( pattern )
-        local index = ENTITY.FindAttachment( self, pattern )
-        if not index or index <= 0 then return end
-
-        local attachmet = ENTITY.GetAttachment( self, index )
-        if attachmet then return attachmet end
-    end
-
-    -- Entity:GetHitBox( bone )
-    function ENTITY:GetHitBox( bone )
-        for hboxset = 0, ENTITY.GetHitboxSetCount( self ) - 1 do
-            for hitbox = 0, ENTITY.GetHitBoxCount( self, hboxset ) - 1 do
-                if ENTITY.GetHitBoxBone( self, hitbox, hboxset ) ~= bone then continue end
-                return hitbox, hboxset
-            end
+-- Entity:GetAbsoluteBonePosition( bone )
+function ENTITY:GetAbsoluteBonePosition( bone )
+    local pos, ang = ENTITY.GetBonePosition( self, bone )
+    if pos == ENTITY.GetPos( self ) then
+        local matrix = ENTITY.GetBoneMatrix( self, bone )
+        if type( matrix ) == "VMatrix" then
+            pos, ang = matrix:GetTranslation(), matrix:GetAngles()
         end
     end
 
-    -- Entity:GetHitBoxBoundsByBone( bone )
-    function ENTITY:GetHitBoxBoundsByBone( bone )
-        local mins, maxs = ENTITY.GetHitBox( self, bone )
-        if not mins or not maxs then return end
+    return pos, ang
+end
 
-        return ENTITY.GetHitBoxBounds( self, mins, maxs )
+-- Entity:GetLocalBonePosition( bone )
+do
+
+    local WorldToLocal = WorldToLocal
+
+    function ENTITY:GetLocalBonePosition( bone )
+        local pos, ang = ENTITY.GetAbsoluteBonePosition( self, bone )
+        if pos ~= nil and ang ~= nil then
+            return WorldToLocal( pos, ang, ENTITY.GetPos( self ), ENTITY.GetAngles( self ) )
+        end
     end
 
-    -- Entity:GetViewAngle( pos )
-    function ENTITY:GetViewAngle( pos )
-        return util.GetViewAngle( self:EyePos(), self:EyeAngles(), pos )
+end
+
+-- Entity:GetAbsoluteBonePositionByName( pattern )
+function ENTITY:GetAbsoluteBonePositionByName( pattern )
+    local bone = ENTITY.FindBone( self, pattern )
+    if not bone or bone < 0 then return end
+    return ENTITY.GetAbsoluteBonePosition( self, bone )
+end
+
+-- Entity:GetLocalBonePositionByName( pattern )
+function ENTITY:GetLocalBonePositionByName( pattern )
+    local bone = ENTITY.FindBone( self, pattern )
+    if not bone or bone < 0 then return end
+    return ENTITY.GetLocalBonePosition( self, bone )
+end
+
+-- Entity:FindAttachment( pattern )
+do
+
+    local cache = {}
+
+    function ENTITY:FindAttachment( pattern )
+        local model = ENTITY.GetModel( self )
+        local modelCache = cache[ model ]
+        if not modelCache then
+            modelCache = {}; cache[ model ] = modelCache
+        end
+
+        local result = modelCache[ pattern ]
+        if result ~= nil then
+            if result == false then return end
+            return result
+        end
+
+        for _, data in ipairs( ENTITY.GetAttachments( self ) ) do
+            if not string.find( data.name, pattern ) then continue end
+            modelCache[ pattern ] = data.id
+            return data.id
+        end
+
+        modelCache[ pattern ] = false
     end
 
-    -- Entity:IsInFOV( pos, fov )
-    function ENTITY:IsInFOV( pos, fov )
-        return util.IsInFOV( self:EyePos(), self:EyeAngles(), pos, fov )
-    end
+    hook.Add( "GameContentChanged", "Clear Attachment Cache", function()
+        table.Empty( cache )
+    end )
 
-    -- Entity:IsScreenVisible( pos, limit, fov )
+end
+
+-- Entity:GetAttachmentByName( pattern )
+function ENTITY:GetAttachmentByName( pattern )
+    local index = ENTITY.FindAttachment( self, pattern )
+    if not index or index <= 0 then return end
+
+    local attachmet = ENTITY.GetAttachment( self, index )
+    if attachmet then return attachmet end
+end
+
+-- Entity:GetHitBox( bone )
+function ENTITY:GetHitBox( bone )
+    for hboxset = 0, ENTITY.GetHitboxSetCount( self ) - 1 do
+        for hitbox = 0, ENTITY.GetHitBoxCount( self, hboxset ) - 1 do
+            if ENTITY.GetHitBoxBone( self, hitbox, hboxset ) ~= bone then continue end
+            return hitbox, hboxset
+        end
+    end
+end
+
+-- Entity:GetHitBoxBoundsByBone( bone )
+function ENTITY:GetHitBoxBoundsByBone( bone )
+    local mins, maxs = ENTITY.GetHitBox( self, bone )
+    if not mins or not maxs then return end
+
+    return ENTITY.GetHitBoxBounds( self, mins, maxs )
+end
+
+-- Entity:GetViewAngle( pos )
+function ENTITY:GetViewAngle( pos )
+    return util.GetViewAngle( self:EyePos(), self:EyeAngles(), pos )
+end
+
+-- Entity:IsInFOV( pos, fov )
+function ENTITY:IsInFOV( pos, fov )
+    return util.IsInFOV( self:EyePos(), self:EyeAngles(), pos, fov )
+end
+
+-- Entity:IsScreenVisible( pos, limit, fov )
+do
+
     local defaultLimit = 512 ^ 2
+
     function ENTITY:IsScreenVisible( pos, limit, fov )
         if not fov and self:IsPlayer() or self:IsNextBot() then
             fov = self:GetFOV()
@@ -1014,12 +1023,29 @@ do
         end
 
         -- player.GetByUniqueID2( uid )
-        function player.GetByUniqueID2( uid )
-            for _, ply in ipairs( player.GetAll() ) do
-                if ply:UniqueID2() == uid then
+        do
+
+            local cache = {}
+
+            function player.GetByUniqueID2( uid )
+                local cached = cache[ uid ]
+                if cached and ENTITY.IsValid( cached ) then
+                    return cached
+                end
+
+                for _, ply in ipairs( player.GetAll() ) do
+                    if ply:UniqueID2() ~= uid then continue end
+                    cache[ uid ] = ply
                     return ply
                 end
             end
+
+            if SERVER then
+                hook.Add( "PlayerDisconnected", "Clear player.GetByUniqueID2 Cache", function( ply )
+                    cache[ ply:UniqueID2() ] = nil
+                end )
+            end
+
         end
 
     end
@@ -1079,15 +1105,34 @@ do
         function PLAYER:UniqueID2()
             if self:IsBot() then
                 local nickname = self:Nick()
-                local cached = cache[ nickname ]
-                if cached ~= nil then return cached end
-                return util.MD5( nickname )
+
+                local result = cache[ nickname ]
+                if result then return result end
+
+                result = util.MD5( nickname )
+                cache[ nickname ] = result
+                return result
             end
 
             local steamid64 = self:SteamID64() or self:Nick()
-            local cached = cache[ steamid64 ]
-            if cached ~= nil then return cached end
-            return util.MD5( steamid64 )
+
+            local result = cache[ steamid64 ]
+            if result then return result end
+
+            result = util.MD5( steamid64 )
+            cache[ steamid64 ] = result
+            return result
+        end
+
+        if SERVER then
+            hook.Add( "PlayerDisconnected", "Clear Player:UniqueID2 Cache", function( ply )
+                if ply:IsBot() then
+                    cache[ ply:Nick() ] = nil
+                    return
+                end
+
+                cache[ ply:SteamID64() or ply:Nick() ] = nil
+            end )
         end
 
     end
