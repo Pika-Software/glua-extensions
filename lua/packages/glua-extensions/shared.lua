@@ -976,11 +976,12 @@ end
 
 -- Entity:GetHitBox( bone )
 function ENTITY:GetHitBox( bone )
-    for hboxset = 0, ENTITY.GetHitboxSetCount( self ) - 1 do
-        for hitbox = 0, ENTITY.GetHitBoxCount( self, hboxset ) - 1 do
-            if ENTITY.GetHitBoxBone( self, hitbox, hboxset ) ~= bone then continue end
-            return hitbox, hboxset
-        end
+    local hboxset = ENTITY.GetHitboxSet( self )
+    if not hboxset then return end
+
+    for hitbox = 0, ENTITY.GetHitBoxCount( self, hboxset ) - 1 do
+        if ENTITY.GetHitBoxBone( self, hitbox, hboxset ) ~= bone then continue end
+        return hitbox, hboxset
     end
 end
 
