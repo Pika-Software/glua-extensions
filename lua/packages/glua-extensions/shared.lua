@@ -81,6 +81,7 @@ function AccessorFunc2( tbl, key, name, valueType )
     if not valueType then
         tbl[ "Set" .. name ] = function( self, value )
             table.SetValue( self, key, value )
+            return self
         end
 
         return
@@ -89,6 +90,7 @@ function AccessorFunc2( tbl, key, name, valueType )
     tbl[ "Set" .. name ] = function( self, value )
         ArgAssert( value, 2, valueType )
         table.SetValue( self, key, value )
+        return self
     end
 end
 
