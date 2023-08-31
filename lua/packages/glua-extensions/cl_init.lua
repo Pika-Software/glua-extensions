@@ -3,25 +3,11 @@ include( "shared.lua" )
 -- Libraries
 local hook = hook
 local file = file
-local cam = cam
 local gui = gui
 
 -- Variables
 local LocalPlayer = LocalPlayer
 local ipairs = ipairs
-
--- cam.Start2D()
-do
-
-    local data = {
-        ["type"] = "2D"
-    }
-
-    function cam.Start2D()
-        cam.Start( data )
-    end
-
-end
 
 -- GM:PlayerInitialized( ply )
 hook.Add( "RenderScene", "PlayerInitialized", function()
@@ -39,17 +25,6 @@ do
 
     function spawnmenu.RemoveCreationTab( name )
         tabs[ name ] = nil
-    end
-
-end
-
--- vgui.Exists( className )
-do
-
-    local vgui = vgui
-
-    function vgui.Exists( className )
-        return vgui.GetControlTable( className ) ~= nil
     end
 
 end

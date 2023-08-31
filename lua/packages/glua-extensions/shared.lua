@@ -609,16 +609,6 @@ function game.GetMaps( addonTitle )
     return result
 end
 
--- string.Hash( str )
-function string.Hash( str )
-    local hash = 0
-    for _, byte in ipairs( { string.byte( str, 0, #str ) } ) do
-        hash = math.fmod( byte + ( ( hash * 32 ) - hash ), 0x07FFFFFF )
-    end
-
-    return hash
-end
-
 do
 
     local utf8 = utf8
@@ -662,6 +652,55 @@ function string.Capitalize( str )
 end
 
 local ENTITY = FindMetaTable( "Entity" )
+
+do
+
+    local packageMarker = gpm.Package:GetIdentifier( "entity-timers" )
+    local timer = timer
+
+    -- Entity:GetTimerIdentifier( identifier )
+    function ENTITY:GetTimerIdentifier( identifier )
+        if type( identifier ) ~= "string" then
+            return packageMarker .. " - N/A [" .. self:EntIndex() .. "]"
+        end
+
+        return packageMarker .. " - " .. identifier .. " [" .. self:EntIndex() .. "]"
+    end
+
+    -- Entity:CreateTimer( identifier, delay, repetitions, func )
+    function ENTITY:CreateTimer( identifier, delay, repetitions, func )
+        identifier = self:GetTimerIdentifier( identifier )
+
+        timer.Create( identifier, delay, repetitions, function()
+            if IsValid( self ) then
+                func( self )
+                return
+            end
+
+            timer.Remove( identifier )
+        end )
+    end
+
+    -- Entity:RemoveTimer( identifier )
+    function ENTITY:RemoveTimer( identifier )
+        timer.Remove( self:GetTimerIdentifier( identifier ) )
+    end
+
+    -- Entity:IsTimerExists( identifier )
+    function ENTITY:IsTimerExists( identifier )
+        return timer.Exists( self:GetTimerIdentifier( identifier ) )
+    end
+
+    -- Entity:SimpleTimer( delay, func )
+    function ENTITY:SimpleTimer( delay, func )
+        timer.Simple( delay, function()
+            if IsValid( self ) then
+                func( self )
+            end
+        end )
+    end
+
+end
 
 do
 
@@ -1176,6 +1215,10 @@ do
             result = util.MD5( steamid64 )
             cache[ steamid64 ] = result
             return result
+        end
+
+        function string.ToUniqueID2( str )
+            return cache[ str ] or util.MD5( str )
         end
 
         if SERVER then

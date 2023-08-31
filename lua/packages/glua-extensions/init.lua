@@ -87,22 +87,6 @@ do
 
     local ENTITY = FindMetaTable( "Entity" )
 
-    -- Entity:GetUnbreakable()
-    function ENTITY:GetUnbreakable()
-        return self:GetNW2Bool( "Unbreakable", false )
-    end
-
-    -- Entity:SetUnbreakable( bool )
-    function ENTITY:SetUnbreakable( bool )
-        self:SetNW2Bool( "Unbreakable", bool )
-    end
-
-    hook.Add( "EntityTakeDamage", "Unbreakable", function( entity )
-        if entity:GetUnbreakable() then
-            return true
-        end
-    end )
-
     -- Entity:Dissolve()
     function ENTITY:Dissolve()
         if not self:IsValid() then return false end
@@ -125,55 +109,6 @@ do
         dissolver:Fire( "dissolve", temporaryName, 0 )
 
         return true
-    end
-
-    do
-
-        local packageMarker = _PKG:GetIdentifier( "entity-timers" )
-        local timer = timer
-
-        -- Entity:GetTimerIdentifier( identifier )
-        function ENTITY:GetTimerIdentifier( identifier )
-            if type( identifier ) ~= "string" then
-                return packageMarker .. " - N/A [" .. self:EntIndex() .. "]"
-            end
-
-            return packageMarker .. " - " .. identifier .. " [" .. self:EntIndex() .. "]"
-        end
-
-        -- Entity:CreateTimer( identifier, delay, repetitions, func )
-        function ENTITY:CreateTimer( identifier, delay, repetitions, func )
-            identifier = self:GetTimerIdentifier( identifier )
-
-            timer.Create( identifier, delay, repetitions, function()
-                if IsValid( self ) then
-                    func( self )
-                    return
-                end
-
-                timer.Remove( identifier )
-            end )
-        end
-
-        -- Entity:RemoveTimer( identifier )
-        function ENTITY:RemoveTimer( identifier )
-            timer.Remove( self:GetTimerIdentifier( identifier ) )
-        end
-
-        -- Entity:IsTimerExists( identifier )
-        function ENTITY:IsTimerExists( identifier )
-            return timer.Exists( self:GetTimerIdentifier( identifier ) )
-        end
-
-        -- Entity:SimpleTimer( delay, func )
-        function ENTITY:SimpleTimer( delay, func )
-            timer.Simple( delay, function()
-                if IsValid( self ) then
-                    func( self )
-                end
-            end )
-        end
-
     end
 
 end
