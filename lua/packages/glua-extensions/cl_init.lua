@@ -1,24 +1,21 @@
 include( "shared.lua" )
 
--- Libraries
 local hook = hook
 local file = file
 local gui = gui
 
--- Variables
 local LocalPlayer = LocalPlayer
 local ipairs = ipairs
 
--- GM:PlayerInitialized( ply )
 hook.Add( "RenderScene", "PlayerInitialized", function()
     hook.Remove( "RenderScene", "PlayerInitialized" )
     hook.Run( "PlayerInitialized", LocalPlayer() )
 end )
 
--- ents.Create aliase for client
+-- ents
 ents.Create = ents.CreateClientside
 
--- spawnmenu.RemoveCreationTab( name )
+-- spawnmenu
 do
 
     local tabs = spawnmenu.GetCreationTabs()
@@ -29,7 +26,7 @@ do
 
 end
 
--- render.GetLightLevel( origin )
+-- render
 do
 
     local render_GetLightColor = render.GetLightColor
@@ -40,7 +37,7 @@ do
     end
 end
 
--- GM:ScreenResolutionChanged( width, height, oldWidth, oldHeight )
+-- util
 do
 
     local ScrW, ScrH = ScrW, ScrH
@@ -57,7 +54,6 @@ do
 
 end
 
--- GM:GameUIToggled( currentState )
 do
 
     local status = gui.IsGameUIVisible()
@@ -72,7 +68,6 @@ do
 
 end
 
--- GM:WindowFocusChanged( hasFocus )
 do
 
     local system_HasFocus = system.HasFocus
@@ -88,13 +83,12 @@ do
 
 end
 
--- GM:PlayerDisconnected( ply )
 hook.Add( "ShutDown", "PlayerDisconnected", function()
     hook.Remove( "ShutDown", "PlayerDisconnected" )
     hook.Run( "PlayerDisconnected", LocalPlayer() )
 end )
 
--- Player:IsLocalPlayer()
+-- Player
 do
 
     local PLAYER = FindMetaTable( "Player" )
@@ -111,11 +105,11 @@ do
 
 end
 
+-- Entity
 do
 
     local ENTITY = FindMetaTable( "Entity" )
 
-    -- Entity:DrawModelWithChildren( flags )
     function ENTITY:DrawModelWithChildren( flags, ignoreNoDraw )
         if not ignoreNoDraw and ( self:GetNoDraw() or self:IsEffectActive( EF_NODRAW ) ) then return end
         self:DrawModel( flags )
@@ -127,7 +121,7 @@ do
 
 end
 
--- string.Translate( str )
+-- string
 do
 
     local string = string
@@ -138,14 +132,13 @@ do
 
 end
 
+-- language
 local language = language
 
--- language.Exists( languageCode )
 function language.Exists( languageCode )
     return file.IsDir( "resource/localization/" .. languageCode, "GAME" )
 end
 
--- language.GetAll()
 do
 
     local select = select
@@ -156,7 +149,6 @@ do
 
 end
 
--- language.GetFlag( languageCode )
 do
 
     local langToCountry = {
@@ -193,17 +185,14 @@ do
 
     local gmod_language = GetConVar( "gmod_language" )
 
-    -- language.Get()
     function language.Get()
         return gmod_language:GetString()
     end
 
-    -- language.Set( languageCode )
     function language.Set( languageCode )
         RunConsoleCommand( gmod_language:GetName(), languageCode )
     end
 
-    -- language.GetPhrases( str )
     function language.GetPhrases( str )
         local result = {}
         for placeholder, fullText in string.gmatch( str, "([%w_%-]-)=(%C+)" ) do

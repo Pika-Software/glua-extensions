@@ -1,4 +1,3 @@
--- Libraries
 local engine = engine
 local string = string
 local table = table
@@ -8,7 +7,6 @@ local file = file
 local util = util
 local hook = hook
 
--- Variables
 local getmetatable = getmetatable
 local ArgAssert = ArgAssert
 local tonumber = tonumber
@@ -68,7 +66,6 @@ do
 
 end
 
--- AccessorFunc2( tbl, key, name, valueType )
 function AccessorFunc2( tbl, key, name, valueType )
     ArgAssert( tbl, 1, "table" )
     ArgAssert( key, 2, "string" )
@@ -94,7 +91,6 @@ function AccessorFunc2( tbl, key, name, valueType )
     end
 end
 
--- concommand.Exists( name )
 do
 
     local commandList, completeList = concommand.GetTable()
@@ -109,7 +105,33 @@ do
 
 end
 
--- table.FastCopy( tbl, issequential, buffer )
+-- IMaterial
+do
+
+    local IMATERIAL = FindMetaTable( "IMaterial" )
+
+    function ismaterial( any )
+        return getmetatable( any ) == IMATERIAL
+    end
+
+    function IMATERIAL:GetSize()
+        return self:GetInt( "$realwidth" ), self:GetInt( "$realheight" )
+    end
+
+end
+
+-- CMoveData
+do
+
+    local CMoveData = FindMetaTable( "CMoveData" )
+
+    function CMoveData:RemoveKey( inKey )
+        self:SetButtons( bit.band( self:GetButtons(), bit.bnot( inKey ) ) )
+    end
+
+end
+
+-- table
 function table.FastCopy( tbl, issequential, buffer )
     local copy = {}
 
@@ -151,7 +173,6 @@ function table.Empty( tbl )
     end
 end
 
--- table.DeepCopy( tbl )
 do
 
     local setmetatable = setmetatable
@@ -174,7 +195,6 @@ do
 
 end
 
--- table.Sub( tbl, offset, len )
 function table.Sub( tbl, offset, len )
     local newTbl = {}
     for i = 1, len do
@@ -184,7 +204,6 @@ function table.Sub( tbl, offset, len )
     return newTbl
 end
 
--- table.Filter( tbl, callback )
 function table.Filter( tbl, callback )
     local i, e, c = 0, #tbl, 1
     if e == 0 then goto abort end
@@ -207,7 +226,6 @@ function table.Filter( tbl, callback )
     return tbl
 end
 
--- table.FilterCopy( tbl, callback )
 function table.FilterCopy( tbl, callback )
     local result = {}
 
@@ -225,7 +243,6 @@ function table.FilterCopy( tbl, callback )
     return result
 end
 
--- table.ConcatKeys( tbl, concatenator )
 function table.ConcatKeys( tbl, concatenator )
     concatenator = concatenator or ""
 
@@ -237,7 +254,6 @@ function table.ConcatKeys( tbl, concatenator )
     return str
 end
 
--- table.MultiRemove( tbl, index, length )
 function table.MultiRemove( tbl, index, length )
     if not length then
         length = index
@@ -252,12 +268,21 @@ function table.MultiRemove( tbl, index, length )
     return result
 end
 
--- util.NiceFloat( number )
+function table.IValuesToKeys( tbl, value )
+    local temp = {}
+    for _, key in ipairs( tbl ) do
+        temp[ key ] = value
+    end
+
+    table.Empty( tbl )
+    return table.Merge( tbl, temp )
+end
+
+-- util
 function util.NiceFloat( number )
     return string.TrimRight( string.TrimRight( string.format( "%f", number ), "0" ), "." )
 end
 
--- util.TypeToString( any, depth )
 do
 
     local tostring = tostring
@@ -343,8 +368,6 @@ do
 
 end
 
--- util.RandomUUID()
--- https://gitlab.com/DBotThePony/DLib/-/blob/develop/lua_src/dlib/util/util.lua#L598
 function util.RandomUUID()
     return string.format( "%.8x-%.4x-%.4x-%.4x-%.8x%.4x",
         math.random( 0, 0xFFFFFFFF ), -- 32
@@ -356,7 +379,6 @@ function util.RandomUUID()
     )
 end
 
--- util.GetSteamVanityURL( str )
 function util.GetSteamVanityURL( str )
     if string.IsSteamID( str ) then
         return "https://steamcommunity.com/profiles/" .. util.SteamIDTo64( sid ) .. "/"
@@ -365,7 +387,6 @@ function util.GetSteamVanityURL( str )
     return "https://steamcommunity.com/profiles/" .. str .. "/"
 end
 
--- util.GetViewAngle( pos, ang, pos2 )
 function util.GetViewAngle( pos, ang, pos2 )
     local diff = pos2 - pos
     diff:Normalize()
@@ -373,12 +394,10 @@ function util.GetViewAngle( pos, ang, pos2 )
     return math.abs( math.deg( math.acos( ang:Forward():Dot( diff ) ) ) )
 end
 
--- util.IsInFOV( pos, ang, pos2, fov )
 function util.IsInFOV( pos, ang, pos2, fov )
     return util.GetViewAngle( pos, ang, pos2 ) <= ( fov or 90 )
 end
 
--- util.TracePenetration( traceData, onPenetration, remainingTraces )
 function util.TracePenetration( traceData, onPenetration, remainingTraces )
     if not remainingTraces then
         remainingTraces = 100
@@ -434,22 +453,19 @@ do
 
 end
 
--- file.IsBSP( filePath, gamePath )
+-- file
 function file.IsBSP( filePath, gamePath )
     return file.Read( filePath, gamePath, 4 ) == "VBSP"
 end
 
--- file.IsGMA( filePath, gamePath )
 function file.IsGMA( filePath, gamePath )
     return file.Read( filePath, gamePath, 4 ) == "GMAD"
 end
 
--- file.IsVTF( filePath, gamePath )
 function file.IsVTF( filePath, gamePath )
     return file.Read( filePath, gamePath, 3 ) == "VTF"
 end
 
--- file.FindAll( filePath, gamePath )
 function file.FindAll( filePath, gamePath )
     if #filePath ~= 0 then
         filePath = filePath .. "/"
@@ -471,26 +487,24 @@ function file.FindAll( filePath, gamePath )
     return result
 end
 
--- engine.GetAddon( wsid )
+-- engine
 function engine.GetAddon( wsid )
     for _, addon in ipairs( engine.GetAddons() ) do
         if addon.wsid == wsid then return addon end
     end
 end
 
--- engine.GetPlayerGravity()
 function engine.GetPlayerGravity()
     return physenv.GetGravity() * FrameTime() / 2
 end
 
--- engine.GetAddonFiles( wsid )
 function engine.GetAddonFiles( wsid )
     local addon = engine.GetAddon( wsid )
     if not addon then return end
     return file.FindAll( "", addon.title )
 end
 
--- game.GetGMAFiles( filePath )
+-- game
 do
 
     local gmad = gmad
@@ -503,7 +517,6 @@ do
 
 end
 
--- game.AmmoList
 function game.GetAmmoList()
     local last = game.GetAmmoName( 1 )
     local result = { last }
@@ -518,6 +531,25 @@ function game.GetAmmoList()
     return result
 end
 
+function game.HasMap( mapName, addonTitle )
+    return file.IsFile( "maps/" .. mapName .. ".bsp", addonTitle or "GAME" )
+end
+
+function game.HasMapNav( mapName, addonTitle )
+    return file.IsFile( "maps/" .. mapName .. ".nav", addonTitle or "GAME" )
+end
+
+function game.GetMaps( addonTitle )
+    local result = {}
+    local files, _ = file.Find( "maps/*%.bsp", addonTitle or "GAME" )
+    for _, fileName in ipairs( files ) do
+        result[ #result + 1 ] = string.sub( fileName, 1, #fileName - 4 )
+    end
+
+    return result
+end
+
+-- net
 do
 
     local encoder = install( "packages/glua-encoder.lua", "https://raw.githubusercontent.com/Pika-Software/glua-encoder/main/lua/packages/glua-encoder.lua" )
@@ -535,45 +567,28 @@ do
         return length, data
     end
 
-    -- net.Remove( name )
     function net.Remove( name )
         net.Receivers[ name ] = nil
     end
 
 end
 
+-- properties
 do
 
     local properties = properties
 
-    -- properties.GetAll()
     function properties.GetAll()
         return properties.List
     end
 
-    -- properties.Remove( name )
     function properties.Remove( name )
         properties.List[ string.lower( name ) ] = nil
     end
 
 end
 
--- IMaterial improvements
-do
-
-    local IMATERIAL = FindMetaTable( "IMaterial" )
-
-    function ismaterial( any )
-        return getmetatable( any ) == IMATERIAL
-    end
-
-    function IMATERIAL:GetSize()
-        return self:GetInt( "$realwidth" ), self:GetInt( "$realheight" )
-    end
-
-end
-
--- ents.Closest( tbl, pos )
+-- ents
 function ents.Closest( tbl, pos )
     local distance, result = nil, nil
 
@@ -588,44 +603,22 @@ function ents.Closest( tbl, pos )
     return result
 end
 
--- game.HasMap( mapName, addonTitle )
-function game.HasMap( mapName, addonTitle )
-    return file.IsFile( "maps/" .. mapName .. ".bsp", addonTitle or "GAME" )
-end
-
--- game.HasMapNav( mapName, addonTitle )
-function game.HasMapNav( mapName, addonTitle )
-    return file.IsFile( "maps/" .. mapName .. ".nav", addonTitle or "GAME" )
-end
-
--- game.GetMaps( addonTitle )
-function game.GetMaps( addonTitle )
-    local result = {}
-    local files, _ = file.Find( "maps/*%.bsp", addonTitle or "GAME" )
-    for _, fileName in ipairs( files ) do
-        result[ #result + 1 ] = string.sub( fileName, 1, #fileName - 4 )
-    end
-
-    return result
-end
-
+-- utf8
 do
 
     local utf8 = utf8
 
-    -- utf8.HexToChar( hexString )
     function utf8.HexToChar( hexString )
         return utf8.char( tonumber( hexString, 16 ) )
     end
 
-    -- string.uchar( str )
     function string.uchar( str )
         return string.gsub( str, "\\u(%w%w%w%w)", utf8.HexToChar )
     end
 
 end
 
--- string.GetCharCount( str, char )
+-- string
 function string.GetCharCount( str, char )
     local counter = 0
     for i = 1, #str do
@@ -635,22 +628,20 @@ function string.GetCharCount( str, char )
     return counter
 end
 
--- string.IsSteamID( str )
 function string.IsSteamID( str )
     if not str then return false end
     return string.match( str, "^STEAM_%d:%d:%d+$" ) ~= nil
 end
 
--- string.IsSteamID64( str )
 function string.IsSteamID64( str )
     return #str == 17 and string.sub( str, 1, 4 ) == "7656"
 end
 
--- string.Capitalize( str )
 function string.Capitalize( str )
     return string.upper( string.sub( str, 1, 1 ) ) .. string.sub( str, 2, #str )
 end
 
+-- Entity
 local ENTITY = FindMetaTable( "Entity" )
 
 do
@@ -888,7 +879,6 @@ do
 
 end
 
--- Entity:FindBone( pattern )
 do
 
     local cache = {}
@@ -932,7 +922,6 @@ do
 
 end
 
--- Entity:GetAbsoluteBonePosition( bone )
 function ENTITY:GetAbsoluteBonePosition( bone )
     local pos, ang = ENTITY.GetBonePosition( self, bone )
     if pos == ENTITY.GetPos( self ) then
@@ -945,7 +934,6 @@ function ENTITY:GetAbsoluteBonePosition( bone )
     return pos, ang
 end
 
--- Entity:GetLocalBonePosition( bone )
 do
 
     local WorldToLocal = WorldToLocal
@@ -959,21 +947,18 @@ do
 
 end
 
--- Entity:GetAbsoluteBonePositionByName( pattern )
 function ENTITY:GetAbsoluteBonePositionByName( pattern )
     local bone = ENTITY.FindBone( self, pattern )
     if not bone or bone < 0 then return end
     return ENTITY.GetAbsoluteBonePosition( self, bone )
 end
 
--- Entity:GetLocalBonePositionByName( pattern )
 function ENTITY:GetLocalBonePositionByName( pattern )
     local bone = ENTITY.FindBone( self, pattern )
     if not bone or bone < 0 then return end
     return ENTITY.GetLocalBonePosition( self, bone )
 end
 
--- Entity:FindAttachment( pattern )
 do
 
     local cache = {}
@@ -1006,7 +991,6 @@ do
 
 end
 
--- Entity:GetAttachmentByName( pattern )
 function ENTITY:GetAttachmentByName( pattern )
     local index = ENTITY.FindAttachment( self, pattern )
     if not index or index <= 0 then return end
@@ -1015,7 +999,6 @@ function ENTITY:GetAttachmentByName( pattern )
     if attachmet then return attachmet end
 end
 
--- Entity:GetHitBox( bone )
 function ENTITY:GetHitBox( bone )
     local hboxset = ENTITY.GetHitboxSet( self )
     if not hboxset then return end
@@ -1026,7 +1009,6 @@ function ENTITY:GetHitBox( bone )
     end
 end
 
--- Entity:GetHitBoxBoundsByBone( bone )
 function ENTITY:GetHitBoxBoundsByBone( bone )
     local mins, maxs = ENTITY.GetHitBox( self, bone )
     if not mins or not maxs then return end
@@ -1034,17 +1016,14 @@ function ENTITY:GetHitBoxBoundsByBone( bone )
     return ENTITY.GetHitBoxBounds( self, mins, maxs )
 end
 
--- Entity:GetViewAngle( pos )
 function ENTITY:GetViewAngle( pos )
     return util.GetViewAngle( self:EyePos(), self:EyeAngles(), pos )
 end
 
--- Entity:IsInFOV( pos, fov )
 function ENTITY:IsInFOV( pos, fov )
     return util.IsInFOV( self:EyePos(), self:EyeAngles(), pos, fov )
 end
 
--- Entity:IsScreenVisible( pos, limit, fov )
 do
 
     local defaultLimit = 512 ^ 2
@@ -1063,16 +1042,15 @@ do
 
     local PLAYER = FindMetaTable( "Player" )
 
+    -- player
     do
 
         local player = player
 
-        -- player.GetStaff()
         function player.GetStaff()
             return table.Filter( player.GetAll(), PLAYER.IsAdmin )
         end
 
-        -- player.Find( str )
         function player.Find( str )
             local result = {}
             for _, ply in ipairs( player.GetAll() ) do
@@ -1084,13 +1062,11 @@ do
             return result
         end
 
-        -- player.Random( noBots )
         function player.Random( noBots )
             local players = noBots and player.GetHumans() or player.GetAll()
             return players[ math.random( 1, #players ) ]
         end
 
-        -- player.GetListenServerHost()
         if game.SinglePlayer() then
 
             local Entity = Entity
@@ -1115,7 +1091,6 @@ do
 
         end
 
-        -- player.GetByUniqueID2( uid )
         do
 
             local cache = {}
@@ -1143,7 +1118,7 @@ do
 
     end
 
-    -- Player:IsSpectator()
+    -- Player
     do
 
         local TEAM_SPECTATOR = TEAM_SPECTATOR
@@ -1154,7 +1129,6 @@ do
 
     end
 
-    -- Player:IsConnecting()
     do
 
         local TEAM_CONNECTING = TEAM_CONNECTING
@@ -1165,7 +1139,6 @@ do
 
     end
 
-    -- Player:GetTeamColor()
     do
 
         local team_GetColor = team.GetColor
@@ -1176,7 +1149,6 @@ do
 
     end
 
-    -- Player:GetHullCurrent()
     function PLAYER:GetHullCurrent()
         if self:Crouching() then
             return self:GetHullDuck()
@@ -1185,12 +1157,10 @@ do
         return self:GetHull()
     end
 
-    -- Player:IsFullyConnected()
     function PLAYER:IsFullyConnected()
         return self:GetNW2Bool( "fully-connected", false )
     end
 
-    -- Player:UniqueID2()
     do
 
         local cache = {}
@@ -1236,39 +1206,25 @@ do
 
 end
 
-do
-
-    local CMoveData = FindMetaTable( "CMoveData" )
-
-    -- CMoveData:RemoveKey( inKey )
-    function CMoveData:RemoveKey( inKey )
-        self:SetButtons( bit.band( self:GetButtons(), bit.bnot( inKey ) ) )
-    end
-
-end
-
--- GM:LanguageChanged( languageCode, oldLanguageCode )
 cvars.AddChangeCallback( "gmod_language", function( _, old, new )
     hook.Run( "LanguageChanged", new, old )
 end, "LanguageChanged" )
 
+-- http
 local http = http
 
--- http.Encode( str )
 function http.Encode( str )
     return string.gsub( string.gsub( str, "[^%w _~%.%-]", function( char )
         return string.format( "%%%02X", string.byte( char ) )
     end ), " ", "+" )
 end
 
--- http.Decode( str )
 function http.Decode( str )
     return string.gsub( string.gsub( str, "+", " " ), "%%(%x%x)", function( c )
         return string.char( tonumber( c, 16 ) )
     end )
 end
 
--- http.ParseQuery( str )
 function http.ParseQuery( str )
     local query = {}
     for key, value in string.gmatch( str, "([^&=?]-)=([^&=?]+)" ) do
@@ -1278,7 +1234,6 @@ function http.ParseQuery( str )
     return query
 end
 
--- http.Query( tbl )
 function http.Query( tbl )
     local result = nil
     for key, value in pairs( tbl ) do
@@ -1288,7 +1243,6 @@ function http.Query( tbl )
     return "?" .. result
 end
 
--- http.PrepareUpload( content, filename )
 function http.PrepareUpload( content, filename )
     local boundary = "fboundary" .. math.random( 1, 100 )
     local header_bound = "Content-Disposition: form-data; name=\'file\'; filename=\'" .. filename .. "\'\r\nContent-Type: application/octet-stream\r\n"

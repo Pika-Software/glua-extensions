@@ -1,11 +1,10 @@
 include( "shared.lua" )
 
--- Libraries
 local util = util
 local game = game
 local hook = hook
 
--- util.Explosion( pos, radius, damage )
+-- util
 do
 
     local EffectData = EffectData
@@ -35,13 +34,12 @@ do
 
 end
 
--- game.GetWorldSize()
+-- game
 function game.GetWorldSize()
     local world = game.GetWorld()
     return world:GetInternalVariable( "m_WorldMins" ), world:GetInternalVariable( "m_WorldMaxs" )
 end
 
--- game.ChangeMap( `string` map )
 do
 
     local RunConsoleCommand = RunConsoleCommand
@@ -60,13 +58,12 @@ do
 
 end
 
--- numpad.IsToggled( ply, num )
+-- numpad
 function numpad.IsToggled( ply, num )
     if not pl.keystate then return false end
     return pl.keystate[ num ]
 end
 
--- GM:PlayerInitialized( ply )
 do
 
     hook.Add( "SetupMove", "PlayerInitialized", function( ply, _, cmd )
@@ -77,17 +74,16 @@ do
 
 end
 
--- GM:PlayerPickupedWeapon( ply, weapon )
 hook.Add( "PlayerCanPickupWeapon", "PlayerPickupedWeapon", function( ply, weapon, locked )
     if locked == true or hook.Run( "PlayerCanPickupWeapon", ply, weapon, true ) == false then return end
     hook.Run( "PlayerPickupedWeapon", ply, weapon )
 end )
 
+-- Entity
 do
 
     local ENTITY = FindMetaTable( "Entity" )
 
-    -- Entity:Dissolve()
     function ENTITY:Dissolve()
         if not self:IsValid() then return false end
 
@@ -113,11 +109,11 @@ do
 
 end
 
+-- Player
 do
 
     local PLAYER = FindMetaTable( "Player" )
 
-    -- Player:IsFamilyShared()
     function PLAYER:IsFamilyShared()
         if self:IsBot() then return false end
         return self:SteamID64() ~= self:OwnerSteamID64()
