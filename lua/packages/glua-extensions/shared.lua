@@ -268,6 +268,22 @@ function table.MultiRemove( tbl, index, length )
     return result
 end
 
+function table.RemoveByFunction( tbl, func )
+    local result, fulfilled = {}, false
+    while not fulfilled do
+        fulfilled = true
+
+        for index, value in ipairs( tbl ) do
+            if not func( index, value ) then continue end
+            result[ #result + 1 ] = table.remove( tbl, index )
+            fulfilled = false
+            break
+        end
+    end
+
+    return result
+end
+
 function table.IValuesToKeys( tbl, value )
     local temp = {}
     for _, key in ipairs( tbl ) do
