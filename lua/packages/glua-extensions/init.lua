@@ -4,6 +4,45 @@ local util = util
 local game = game
 local hook = hook
 
+do
+
+    local ipairs = ipairs
+    local unpack = unpack
+    local funcs = {}
+
+    util.NextTick( function()
+        for _, tbl in ipairs( funcs ) do
+            local args = tbl.Args
+            if args then
+                tbl.Function( unpack( args ) )
+                return
+            end
+
+            tbl.Function()
+        end
+
+        funcs = nil
+    end )
+
+    function ServerInitialized( func, ... )
+        if not funcs then
+            return func( ... )
+        end
+
+        local args = { ... }
+        local tbl = {
+            ["Function"] = func
+        }
+
+        if #args ~= 0 then
+            tbl.Args = args
+        end
+
+        funcs[ #funcs + 1 ] = tbl
+    end
+
+end
+
 -- util
 do
 
@@ -120,3 +159,19 @@ do
     end
 
 end
+
+-- Literally garrysmod-requests #1845
+hook.Add( "EntityFireBullets", "Bullet Callback", function( _, data )
+    local func = data.Callback
+    function data.Callback( ... )
+        hook.Run( "OnFireBulletCallback", ... )
+        if not func then return end
+        return func( ... )
+    end
+end, HOOK_MONITOR_HIGH )
+
+hook.Add( "OnFireBulletCallback", "EntityTakeDamage", function( _, traceResult, damageInfo )
+    local entity = traceResult.Entity
+    if not IsValid( entity ) then return end
+    hook.Run( "EntityTakeDamage", entity, damageInfo )
+end )

@@ -7,10 +7,47 @@ local gui = gui
 local LocalPlayer = LocalPlayer
 local ipairs = ipairs
 
-hook.Add( "RenderScene", "PlayerInitialized", function()
-    hook.Remove( "RenderScene", "PlayerInitialized" )
-    hook.Run( "PlayerInitialized", LocalPlayer() )
-end )
+do
+
+    local unpack = unpack
+    local funcs = {}
+
+    hook.Add( "RenderScene", "PlayerInitialized", function()
+        hook.Remove( "RenderScene", "PlayerInitialized" )
+        local localPlayer = LocalPlayer()
+        for _, tbl in ipairs( funcs ) do
+            local args = tbl.Args
+            if args then
+                tbl.Function( localPlayer, unpack( args ) )
+                return
+            end
+
+            tbl.Function( localPlayer )
+        end
+
+        funcs = nil
+        hook.Run( "PlayerInitialized", localPlayer  )
+    end )
+
+    function ClientInitialized( func, ... )
+        if not funcs then
+            return func( LocalPlayer(), ... )
+        end
+
+
+        local args = { ... }
+        local tbl = {
+            ["Function"] = func
+        }
+
+        if #args ~= 0 then
+            tbl.Args = args
+        end
+
+        funcs[ #funcs + 1 ] = tbl
+    end
+
+end
 
 -- ents
 ents.Create = ents.CreateClientside

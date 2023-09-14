@@ -1,5 +1,6 @@
 local engine = engine
 local string = string
+local debug = debug
 local table = table
 local math = math
 local game = game
@@ -89,6 +90,10 @@ function AccessorFunc2( tbl, key, name, valueType )
         table.SetValue( self, key, value )
         return self
     end
+end
+
+function iscfunction( func )
+    return debug.getinfo( func ).short_src == "[C]"
 end
 
 do
