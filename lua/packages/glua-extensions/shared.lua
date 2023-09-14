@@ -125,17 +125,6 @@ do
 
 end
 
--- CMoveData
-do
-
-    local CMoveData = FindMetaTable( "CMoveData" )
-
-    function CMoveData:RemoveKey( inKey )
-        self:SetButtons( bit.band( self:GetButtons(), bit.bnot( inKey ) ) )
-    end
-
-end
-
 -- table
 function table.FastCopy( tbl, issequential, buffer )
     local copy = {}
@@ -1232,45 +1221,100 @@ cvars.AddChangeCallback( "gmod_language", function( _, old, new )
 end, "LanguageChanged" )
 
 -- http
-local http = http
+do
 
-function http.Encode( str )
-    return string.gsub( string.gsub( str, "[^%w _~%.%-]", function( char )
-        return string.format( "%%%02X", string.byte( char ) )
-    end ), " ", "+" )
-end
+    local http = http
 
-function http.Decode( str )
-    return string.gsub( string.gsub( str, "+", " " ), "%%(%x%x)", function( c )
-        return string.char( tonumber( c, 16 ) )
-    end )
-end
-
-function http.ParseQuery( str )
-    local query = {}
-    for key, value in string.gmatch( str, "([^&=?]-)=([^&=?]+)" ) do
-        query[ key ] = http.Decode( value )
+    function http.Encode( str )
+        return string.gsub( string.gsub( str, "[^%w _~%.%-]", function( char )
+            return string.format( "%%%02X", string.byte( char ) )
+        end ), " ", "+" )
     end
 
-    return query
-end
-
-function http.Query( tbl )
-    local result = nil
-    for key, value in pairs( tbl ) do
-        result = ( result and ( result .. "&" ) or "" ) .. key .. "=" .. value
+    function http.Decode( str )
+        return string.gsub( string.gsub( str, "+", " " ), "%%(%x%x)", function( c )
+            return string.char( tonumber( c, 16 ) )
+        end )
     end
 
-    return "?" .. result
+    function http.ParseQuery( str )
+        local query = {}
+        for key, value in string.gmatch( str, "([^&=?]-)=([^&=?]+)" ) do
+            query[ key ] = http.Decode( value )
+        end
+
+        return query
+    end
+
+    function http.Query( tbl )
+        local result = nil
+        for key, value in pairs( tbl ) do
+            result = ( result and ( result .. "&" ) or "" ) .. key .. "=" .. value
+        end
+
+        return "?" .. result
+    end
+
+    function http.PrepareUpload( content, filename )
+        local boundary = "fboundary" .. math.random( 1, 100 )
+        local header_bound = "Content-Disposition: form-data; name=\'file\'; filename=\'" .. filename .. "\'\r\nContent-Type: application/octet-stream\r\n"
+        local data = string.format( "--%s\r\n%s\r\n%s\r\n--%s--\r\n", boundary, header_bound, content, boundary )
+
+        return {
+            { "Content-Length", #data },
+            { "Content-Type", "multipart/form-data; boundary=" .. boundary }
+        }, data
+    end
+
 end
 
-function http.PrepareUpload( content, filename )
-    local boundary = "fboundary" .. math.random( 1, 100 )
-    local header_bound = "Content-Disposition: form-data; name=\'file\'; filename=\'" .. filename .. "\'\r\nContent-Type: application/octet-stream\r\n"
-    local data = string.format( "--%s\r\n%s\r\n%s\r\n--%s--\r\n", boundary, header_bound, content, boundary )
+do
 
-    return {
-        { "Content-Length", #data },
-        { "Content-Type", "multipart/form-data; boundary=" .. boundary }
-    }, data
+    local bit = bit
+
+    -- CMoveData
+    do
+
+        local CMoveData = FindMetaTable( "CMoveData" )
+
+        function CMoveData:RemoveKey( inKey )
+            self:SetButtons( bit.band( self:GetButtons(), bit.bnot( inKey ) ) )
+        end
+
+    end
+
+    -- CTakeDamageInfo
+    do
+
+        local CTakeDamageInfo = FindMetaTable( "CTakeDamageInfo" )
+
+        -- Enums
+        local DMG_BULLET = DMG_BULLET
+        local DMG_BLAST = DMG_BLAST
+        local DMG_CRUSH = DMG_CRUSH
+        local DMG_SHOCK = DMG_SHOCK
+        local DMG_BURN = DMG_BURN
+
+        function CTakeDamageInfo:IsPhysicsDamage()
+            return bit.band( self:GetDamageType(), DMG_CRUSH ) == DMG_CRUSH
+        end
+
+        function CTakeDamageInfo:IsFireDamage()
+            return bit.band( self:GetDamageType(), DMG_BURN ) == DMG_BURN
+        end
+
+        function CTakeDamageInfo:IsBulletDamage()
+            return bit.band( self:GetDamageType(), DMG_BULLET ) == DMG_BULLET
+        end
+
+        function CTakeDamageInfo:IsExplosionDamage()
+            return bit.band( self:GetDamageType(), DMG_BLAST ) == DMG_BLAST
+        end
+
+        function CTakeDamageInfo:IsShockDamage()
+            return bit.band( self:GetDamageType(), DMG_SHOCK ) == DMG_SHOCK
+        end
+
+    end
+
 end
