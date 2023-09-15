@@ -34,7 +34,6 @@ do
             return func( LocalPlayer(), ... )
         end
 
-
         local args = { ... }
         local tbl = {
             ["Function"] = func
